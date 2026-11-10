@@ -1,7 +1,7 @@
 ---
 troy-doc: "F01-design"
 lang: "en"
-version: "1.0"
+version: "1.1"
 updated: "2026-11-10"
 status: "Approved by Troy on 2026-11-10"
 mirror: "design.zh-CN.md"
@@ -363,8 +363,8 @@ Parameters:
 `parse_quantity` reads `text` in these steps:
 
 1. It removes whitespace at both ends, including the ideographic space U+3000.
-2. `to taste` in any case, with any whitespace between the two words, gives `TO_TASTE`. So does `适量`.
-3. The number is the text before the first letter or whitespace character. A letter is a character for which `str.isalpha` is true, which includes Chinese characters. The number is one or more ASCII digits, optionally followed by `.` and one or more ASCII digits, such as `3`, `300`, `1.5`, or `0.25`. It becomes an exact `Fraction`, so `1.5` is 3/2.
+2. `to taste` in any case, with one or more whitespace characters between the two words, gives `TO_TASTE`. So does `适量`.
+3. The number is the text before the first letter or whitespace character. A letter is a character for which `str.isalpha` is true, which includes Chinese characters. The number is one or more ASCII digits, optionally followed by `.` and one or more ASCII digits, such as `3`, `300`, `1.5`, or `0.25`. It has at most 15 digits. The point does not count, and every digit counts, leading and trailing zeros included, so `12345678901234.5` is read and `0.000000000000001` is not. The limit keeps the number far below the 4,300 digits that Python's `int` and `Fraction` read from a string. The number becomes an exact `Fraction`, so `1.5` is 3/2.
 4. The rest of the text, without whitespace at either end, is the unit, read with `parse_unit`. The space before the unit is optional, so `300 g`, `300g`, and `300克` all work.
 5. An amount with no unit gets `default_unit`.
 
@@ -375,7 +375,7 @@ Errors:
 | Error | When |
 | --- | --- |
 | `EMPTY` | `text` is empty or holds only whitespace. |
-| `NOT_A_NUMBER` | The number is missing or is not a decimal number of ASCII digits, as in `a few`, `g`, `1/2 tsp`, `1,5 g`, `-1 g`, `½ tsp`, or `３ 个` with a fullwidth digit. |
+| `NOT_A_NUMBER` | The number is missing, is not a decimal number of ASCII digits, or has more than 15 digits, as in `a few`, `g`, `1/2 tsp`, `1,5 g`, `-1 g`, `½ tsp`, `３ 个` with a fullwidth digit, or `1234567890123456 g`. This row comes before `UNKNOWN_UNIT` and `ZERO`, so `1234567890123456 cups` and `0000000000000000 g` give `NOT_A_NUMBER` too. |
 | `UNKNOWN_UNIT` | The unit is not a spelling in 2.3, as in `1 cups` or `1 适量`. The field `unit` holds it. |
 | `NO_UNIT` | The text has no unit, and `default_unit` is `None`. |
 | `ZERO` | The number is 0, as in `0 g` or `0.00 个`. |
@@ -549,7 +549,11 @@ Parameters:
   - The amount is rounded up to at most two decimals. It is written with `.` as the decimal point, without trailing zeros, and without a thousands separator, such as `2`, `4.5`, `1.34`, or `1500`.
   - In English, the label is plural unless the written amount is `1`.
 
-Errors: None
+Errors:
+
+| Error | When |
+| --- | --- |
+| `ValueError` | The rounded amount has more than 4,300 digits before the point, Python's limit on writing an `int` (`sys.int_info.default_max_str_digits`). This error comes only from a wrong call. No amount that `parse_quantity` reads comes near that size, even scaled by servings. |
 
 - Side effects: None
 - Performance target: None
@@ -601,7 +605,11 @@ Parameters:
 4. It writes 1000 g or more in kg, and 1000 ml or more in L. The amount in kg or L is rounded up to at most two decimals and written as in 2.11: 1500 g is `1.5 kg`, 1000 g is `1 kg`, and 1001 g is `1.01 kg`.
 5. It writes any other amount as the whole number, a space, and the label of its unit, such as `600 g`, `15 ml`, `5 stalks`, or `1 block`. In English, the label is plural unless the number is 1.
 
-Errors: None
+Errors:
+
+| Error | When |
+| --- | --- |
+| `ValueError` | The rounded amount that `to_rounded_text` writes has more than 4,300 digits before the point, Python's limit on writing an `int` (`sys.int_info.default_max_str_digits`). This error comes only from a wrong call. No amount that `parse_quantity` reads comes near that size, even scaled by servings. |
 
 - Side effects: None
 - Performance target: None
@@ -636,16 +644,17 @@ None
 
 | Item | Result | Note |
 | --- | --- | --- |
-| Fits the module layout and the data model | Pass | `lang` and `units` are base modules, and `units` imports only `lang` (architecture 3 and 4). `Unit` has one member for each unit of requirements 3, with the kind, size, and names of architecture 5.2. One `Quantity` with `amount` and `unit` both `None` for to taste fits 5.2, because `RecipeIngredient.quantity` is a `Quantity` and must hold 适量. Rounding up to two decimals follows ADR-0007, which writes at most two decimals and rounds up with `math.ceil`. Rounding kg and L up also follows Q18: 1001 g written as 1 kg would buy too little. `add_quantities` fits `ShoppingLine` in 5.2: to taste alone gives the empty tuple, and the order of first appearance gives `30 ml + 10 g` and `5 stalks + 1 bunch`, as the F13 prototype and v0.1-S18 expect. Unrounded sums keep rounding in one place, when the list is written. |
-| Follows the error handling and naming conventions | Pass | Bad data gives a `WrongQuantity` value, and only wrong calls raise (architecture 4 and 6). `parse_quantity` keeps that rule: it never raises, its reasons have a fixed order, and `UNKNOWN_UNIT` carries the unit that the F07 message `Unknown unit "cups" in "1 cups".` needs. Its number format is a product choice that the requirements leave open, and `check` reports every text that it rejects. The plural labels follow ADR-0004, which keeps unit names in `units` as plain data because `units` cannot import `text`. A plural label is one of those names, stored and not built, so the rule of architecture 8 on English plurals covers message text from `text`, not unit labels. The `TypeError` for an `int` makes "every amount is a `Fraction`" (architecture 8) hold at run time. mypy in strict mode already rejects an `int` there. Names follow PEP 8, and both dataclasses are frozen with `slots=True`. |
+| Fits the module layout and the data model | Pass | `lang` and `units` are base modules, and `units` imports only `lang` (architecture 3 and 4). `Unit` has one member for each unit of requirements 3, with the kind, size, and names of architecture 5.2. One `Quantity` with `amount` and `unit` both `None` for to taste fits 5.2, because `RecipeIngredient.quantity` is a `Quantity` and must hold 适量. Rounding up to two decimals follows ADR-0007, which writes at most two decimals and rounds up with `math.ceil`. Rounding kg and L up also follows Q18: 1001 g written as 1 kg would buy too little. `add_quantities` fits `ShoppingLine` in 5.2: to taste alone gives the empty tuple, and the order of first appearance gives `30 ml + 10 g` and `5 stalks + 1 bunch`, as the F13 prototype and v0.1-S18 expect. Unrounded sums keep rounding in one place, when the list is written. Version 1.1 keeps this. The 15-digit limit changes only which texts `parse_quantity` reads, and every amount that it reads is still an exact `Fraction` (ADR-0007). |
+| Follows the error handling and naming conventions | Pass | Bad data gives a `WrongQuantity` value, and only wrong calls raise (architecture 4 and 6). `parse_quantity` keeps that rule: it never raises, its reasons have a fixed order, and `UNKNOWN_UNIT` carries the unit that the F07 message `Unknown unit "cups" in "1 cups".` needs. Its number format is a product choice that the requirements leave open, and `check` reports every text that it rejects. The plural labels follow ADR-0004, which keeps unit names in `units` as plain data because `units` cannot import `text`. A plural label is one of those names, stored and not built, so the rule of architecture 8 on English plurals covers message text from `text`, not unit labels. The `TypeError` for an `int` makes "every amount is a `Fraction`" (architecture 8) hold at run time. mypy in strict mode already rejects an `int` there. Names follow PEP 8, and both dataclasses are frozen with `slots=True`. Version 1.1 keeps both parts of the rule. Step 3 of 2.7 limits the number to 15 digits before the number becomes a `Fraction`, so a longer number gives `NOT_A_NUMBER` and never reaches the `ValueError` that `int` and `Fraction` raise above 4,300 digits. 15 digits is also below 640, the lowest limit that `sys.set_int_max_str_digits` accepts, so `parse_quantity` never raises under any setting. The examples of step 3 fall on each side of the limit: `12345678901234.5` has 15 digits, and `0.000000000000001` has 16. Step 2 now makes clear that `totaste`, with no whitespace, is not `to taste` and gives `NOT_A_NUMBER`. The `ValueError` rows of 2.11 and 2.12 describe wrong calls, which architecture 6 treats as bugs. 2.12 counts the digits of the amount that it writes, after step 4 changes g to kg or ml to L. `sys.int_info.default_max_str_digits` names the default limit. The limit in force is `sys.get_int_max_str_digits()`, which `PYTHONINTMAXSTRDIGITS` can change, so the 4,300 in both rows holds for the default, which the tests use. Not blocking: the F04 message for `NOT_A_NUMBER` must also fit `1234567890123456 g`, for example by naming the 15-digit limit. |
 | Does not duplicate an existing interface | Pass | F01 is the first feature, and `src/` holds no code yet. `to_text` writes a quantity in the recipe's unit for `show`, and `to_rounded_text` applies the rules of the shopping list, so the two do not overlap. The English plurals that F02 gives message text are a separate interface from these unit labels. |
-| Depends only on features earlier in the order | Pass | F01 has no feature dependencies. `units` depends only on `lang`, which F01 also builds. Both use only the standard library, so no new dependency needs review under R16. |
-| Adds no hidden coupling between modules | Pass | Later modules use only the names that section 2 exports. `catalog` and `recipes` read `WrongQuantity` and its reasons. 2.3 has code find a unit with `parse_unit`, never by its value. `units` keeps no state, reads no file, and prints nothing. |
-| Changes an implemented interface only through the change flow | Pass | No interface is implemented yet, and section 3 says None. |
+| Depends only on features earlier in the order | Pass | F01 has no feature dependencies. `units` depends only on `lang`, which F01 also builds. Both use only the standard library, so no new dependency needs review under R16. Version 1.1 adds no dependency. The `sys.int_info` that its new error rows name is part of the standard library. |
+| Adds no hidden coupling between modules | Pass | Later modules use only the names that section 2 exports. `catalog` and `recipes` read `WrongQuantity` and its reasons. 2.3 has code find a unit with `parse_unit`, never by its value. `units` keeps no state, reads no file, and prints nothing. Version 1.1 states one assumption about callers in 2.11 and 2.12: no amount that `parse_quantity` reads comes near 4,300 digits, even scaled by servings. That assumption holds only while servings stay small. `tomllib` reads a whole number of up to 4,300 digits, far past the 64 bits of TOML 1.0, and Python's `int` reads as many from a command line. So the F05 design must give the settings' `servings` an upper bound, the F06 design must give a dish's servings one, and the F09 design must give `show --servings` one. Without these bounds, the settings, a menu file, or a command line could make `to_text` or `to_rounded_text` raise for bad data, which architecture 6 forbids. Recipe servings only divide an amount, so F04 needs no bound for this. Not blocking, because each bound belongs to a feature that reads servings, and the Architect checks it when it reviews that feature's design. |
+| Changes an implemented interface only through the change flow | Pass | No interface is implemented yet, and section 3 says None. Version 1.1 changes 2.7, 2.11, and 2.12 before any code exists. `src/` does not exist yet, so no implemented interface changes, and section 3 still says None. |
 
 | Round | Issue | Resolution |
 | --- | --- | --- |
 | 1 | No blocking issue. The Architect checked the six choices that the Interface Designer named against the requirements and the architecture. Only the plural labels seemed to conflict with architecture 8, and ADR-0004 settles them as unit names that `units` holds. | Approved with no change. |
+| 1 (version 1.1) | No blocking issue. The Architect reviewed the change from version 1.0 to 1.1. In 2.7, it checked the 15-digit limit with its examples and its reason, the `to taste` wording, and the new `NOT_A_NUMBER` condition. It also checked the `ValueError` rows of 2.11 and 2.12. It tested the digit limits of `int`, `Fraction`, and `tomllib` in Python 3.14.3, which has the same limits as Python 3.13. Two points go to later designs: upper bounds on servings in F05, F06, and F09, and an F04 message for `NOT_A_NUMBER` that fits a 16-digit number. | Approved with no change. |
 
 ## 5. Change log
 
@@ -653,3 +662,4 @@ None
 | --- | --- | --- |
 | 0.1 | 2026-11-10 | First draft. |
 | 1.0 | 2026-11-10 | Approved by Troy. |
+| 1.1 | 2026-11-10 | Limits the number that `parse_quantity` reads to 15 digits, and makes clear that `to taste` takes one or more whitespace characters between its words (2.7). Adds a `ValueError` to `to_text` (2.11) and `to_rounded_text` (2.12) for a rounded amount with more than 4,300 digits before the point. |
