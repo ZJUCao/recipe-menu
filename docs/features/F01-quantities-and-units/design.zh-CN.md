@@ -1,7 +1,7 @@
 ---
 troy-doc: "F01-design"
 lang: "zh-CN"
-version: "1.1"
+version: "1.2"
 updated: "2026-11-10"
 status: "Troy 已于 2026-11-10 批准"
 mirror-of: "design.md"
@@ -300,7 +300,9 @@ class WrongQuantity:
 ```python
 from recipe_menu.units import WrongQuantity, WrongQuantityReason, parse_quantity
 
-assert parse_quantity(" 1 cups ") == WrongQuantity(WrongQuantityReason.UNKNOWN_UNIT, "1 cups", "cups")
+assert parse_quantity(" 1 cups ") == WrongQuantity(
+    WrongQuantityReason.UNKNOWN_UNIT, "1 cups", "cups"
+)
 assert parse_quantity("a few") == WrongQuantity(WrongQuantityReason.NOT_A_NUMBER, "a few")
 ```
 
@@ -388,7 +390,14 @@ def parse_quantity(text: str, default_unit: Unit | None = None) -> Quantity | Wr
 ```python
 from fractions import Fraction
 
-from recipe_menu.units import TO_TASTE, Quantity, Unit, WrongQuantity, WrongQuantityReason, parse_quantity
+from recipe_menu.units import (
+    TO_TASTE,
+    Quantity,
+    Unit,
+    WrongQuantity,
+    WrongQuantityReason,
+    parse_quantity,
+)
 
 assert parse_quantity("300 g") == Quantity(Fraction(300), Unit.G)
 assert parse_quantity("1.5kg") == Quantity(Fraction(3, 2), Unit.KG)
@@ -513,14 +522,22 @@ from fractions import Fraction
 from recipe_menu.units import TO_TASTE, Quantity, Unit, add_quantities
 
 choy_sum = Quantity(Fraction(1), Unit.JIN)
-assert add_quantities([choy_sum, choy_sum.scale(Fraction(4, 2))]) == (Quantity(Fraction(1500), Unit.G),)
+assert add_quantities([choy_sum, choy_sum.scale(Fraction(4, 2))]) == (
+    Quantity(Fraction(1500), Unit.G),
+)
 
 stalk = Quantity(Fraction(1), Unit.STALK)
 scallion = [stalk.scale(Fraction(2)), stalk, stalk, stalk, Quantity(Fraction(1), Unit.BUNCH)]
-assert add_quantities(scallion) == (Quantity(Fraction(5), Unit.STALK), Quantity(Fraction(1), Unit.BUNCH))
+assert add_quantities(scallion) == (
+    Quantity(Fraction(5), Unit.STALK),
+    Quantity(Fraction(1), Unit.BUNCH),
+)
 
 soy_sauce = [Quantity(Fraction(2), Unit.TBSP), TO_TASTE, Quantity(Fraction(10), Unit.G)]
-assert add_quantities(soy_sauce) == (Quantity(Fraction(30), Unit.ML), Quantity(Fraction(10), Unit.G))
+assert add_quantities(soy_sauce) == (
+    Quantity(Fraction(30), Unit.ML),
+    Quantity(Fraction(10), Unit.G),
+)
 
 assert add_quantities([TO_TASTE, TO_TASTE]) == ()
 assert add_quantities([]) == ()
@@ -655,6 +672,7 @@ assert TO_TASTE.to_rounded_text(Lang.EN) == "to taste"
 | --- | --- | --- |
 | 1 | 没有阻塞问题。架构师对照需求和架构，检查了接口设计师列出的六项选择。只有复数名称看起来和架构 8 冲突，而 ADR-0004 已经把它们定为 `units` 保存的单位名称。 | 批准，无需修改。 |
 | 1（版本 1.1） | 没有阻塞问题。架构师审查了从版本 1.0 到 1.1 的修改。在 2.7 里，架构师检查了 15 位的上限及其例子和理由、`to taste` 的写法，以及新的 `NOT_A_NUMBER` 条件。架构师还检查了 2.11 和 2.12 的 `ValueError` 行。架构师在 Python 3.14.3 里测试了 `int`、`Fraction` 和 `tomllib` 的位数上限，这些上限与 Python 3.13 相同。有两点留给后续设计：F05、F06 和 F09 给份数定上限，F04 给 `NOT_A_NUMBER` 写一条也适用于 16 位数字的提示。 | 批准，无需修改。 |
+| 1（版本 1.2） | 没有阻塞问题。架构师审查了从版本 1.1 到 1.2 的修改。除了版本号和修改记录，这次只改了 2.5、2.7 和 2.10 的示例。Python 的 `ast` 模块把改动的三个示例解析成与版本 1.1 相同的语法树，所以示例的含义都没有改变。其余 21 个代码块没有变化，中文版的每个代码块都与英文版相同。在 `recipe-menu` 环境里，ruff 0.17.4 的 `ruff format --check` 报告两个文件都已排版，而对版本 1.1 正好在这些行上报告未排版。代码块里最长的一行现在是 96 个字符。检查表的各项都不变，因为没有接口、错误或名称发生变化。 | 批准，无需修改。 |
 
 ## 5. 修改记录
 
@@ -663,3 +681,4 @@ assert TO_TASTE.to_rounded_text(Lang.EN) == "to taste"
 | 0.1 | 2026-11-10 | 初稿。 |
 | 1.0 | 2026-11-10 | Troy 批准。 |
 | 1.1 | 2026-11-10 | `parse_quantity` 读取的数字限制为最多 15 位，并说明 `to taste` 两个词之间是一个或多个空白字符（2.7）。`to_text`（2.11）和 `to_rounded_text`（2.12）增加 `ValueError`：取整后的数值在小数点前超过 4300 位时抛出。 |
+| 1.2 | 2026-11-10 | 按项目每行 100 个字符的上限重新排版 2.5、2.7 和 2.10 的示例。示例的含义都没有改变。 |
