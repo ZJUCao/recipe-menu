@@ -1,7 +1,7 @@
 ---
 troy-doc: "F01-design"
 lang: "en"
-version: "1.1"
+version: "1.2"
 updated: "2026-11-10"
 status: "Approved by Troy on 2026-11-10"
 mirror: "design.zh-CN.md"
@@ -300,7 +300,9 @@ Example:
 ```python
 from recipe_menu.units import WrongQuantity, WrongQuantityReason, parse_quantity
 
-assert parse_quantity(" 1 cups ") == WrongQuantity(WrongQuantityReason.UNKNOWN_UNIT, "1 cups", "cups")
+assert parse_quantity(" 1 cups ") == WrongQuantity(
+    WrongQuantityReason.UNKNOWN_UNIT, "1 cups", "cups"
+)
 assert parse_quantity("a few") == WrongQuantity(WrongQuantityReason.NOT_A_NUMBER, "a few")
 ```
 
@@ -388,7 +390,14 @@ Example:
 ```python
 from fractions import Fraction
 
-from recipe_menu.units import TO_TASTE, Quantity, Unit, WrongQuantity, WrongQuantityReason, parse_quantity
+from recipe_menu.units import (
+    TO_TASTE,
+    Quantity,
+    Unit,
+    WrongQuantity,
+    WrongQuantityReason,
+    parse_quantity,
+)
 
 assert parse_quantity("300 g") == Quantity(Fraction(300), Unit.G)
 assert parse_quantity("1.5kg") == Quantity(Fraction(3, 2), Unit.KG)
@@ -513,14 +522,22 @@ from fractions import Fraction
 from recipe_menu.units import TO_TASTE, Quantity, Unit, add_quantities
 
 choy_sum = Quantity(Fraction(1), Unit.JIN)
-assert add_quantities([choy_sum, choy_sum.scale(Fraction(4, 2))]) == (Quantity(Fraction(1500), Unit.G),)
+assert add_quantities([choy_sum, choy_sum.scale(Fraction(4, 2))]) == (
+    Quantity(Fraction(1500), Unit.G),
+)
 
 stalk = Quantity(Fraction(1), Unit.STALK)
 scallion = [stalk.scale(Fraction(2)), stalk, stalk, stalk, Quantity(Fraction(1), Unit.BUNCH)]
-assert add_quantities(scallion) == (Quantity(Fraction(5), Unit.STALK), Quantity(Fraction(1), Unit.BUNCH))
+assert add_quantities(scallion) == (
+    Quantity(Fraction(5), Unit.STALK),
+    Quantity(Fraction(1), Unit.BUNCH),
+)
 
 soy_sauce = [Quantity(Fraction(2), Unit.TBSP), TO_TASTE, Quantity(Fraction(10), Unit.G)]
-assert add_quantities(soy_sauce) == (Quantity(Fraction(30), Unit.ML), Quantity(Fraction(10), Unit.G))
+assert add_quantities(soy_sauce) == (
+    Quantity(Fraction(30), Unit.ML),
+    Quantity(Fraction(10), Unit.G),
+)
 
 assert add_quantities([TO_TASTE, TO_TASTE]) == ()
 assert add_quantities([]) == ()
@@ -655,6 +672,7 @@ None
 | --- | --- | --- |
 | 1 | No blocking issue. The Architect checked the six choices that the Interface Designer named against the requirements and the architecture. Only the plural labels seemed to conflict with architecture 8, and ADR-0004 settles them as unit names that `units` holds. | Approved with no change. |
 | 1 (version 1.1) | No blocking issue. The Architect reviewed the change from version 1.0 to 1.1. In 2.7, it checked the 15-digit limit with its examples and its reason, the `to taste` wording, and the new `NOT_A_NUMBER` condition. It also checked the `ValueError` rows of 2.11 and 2.12. It tested the digit limits of `int`, `Fraction`, and `tomllib` in Python 3.14.3, which has the same limits as Python 3.13. Two points go to later designs: upper bounds on servings in F05, F06, and F09, and an F04 message for `NOT_A_NUMBER` that fits a 16-digit number. | Approved with no change. |
+| 1 (version 1.2) | No blocking issue. The Architect reviewed the change from version 1.1 to 1.2. Apart from the version and the change log, it changes only the examples of 2.5, 2.7, and 2.10. Python's `ast` module parses each of the three changed examples to the same syntax tree as in version 1.1, so no example changes its meaning. The other 21 code blocks are unchanged, and every code block of the mirror equals the English one. In the `recipe-menu` environment, `ruff format --check` with ruff 0.17.4 reports both files formatted, and it reports version 1.1 unformatted at exactly these lines. The longest line in a code block is now 96 characters. No checklist item changes, because no interface, error, or name changes. | Approved with no change. |
 
 ## 5. Change log
 
@@ -663,3 +681,4 @@ None
 | 0.1 | 2026-11-10 | First draft. |
 | 1.0 | 2026-11-10 | Approved by Troy. |
 | 1.1 | 2026-11-10 | Limits the number that `parse_quantity` reads to 15 digits, and makes clear that `to taste` takes one or more whitespace characters between its words (2.7). Adds a `ValueError` to `to_text` (2.11) and `to_rounded_text` (2.12) for a rounded amount with more than 4,300 digits before the point. |
+| 1.2 | 2026-11-10 | Formats the examples of 2.5, 2.7, and 2.10 to the project's 100-character line limit. No example changes its meaning. |
