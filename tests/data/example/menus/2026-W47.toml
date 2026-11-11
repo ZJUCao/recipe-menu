@@ -1,0 +1,34 @@
+# 2026-W47: 16 to 22 November 2026
+week = "2026-W47"
+
+[monday]
+lunch = []
+dinner = ["tomato-egg", "choy-sum", "rice"]
+
+[tuesday]
+lunch = []
+dinner = ["mapo-tofu", "rice"]
+
+[wednesday]
+lunch = []
+dinner = []
+
+[thursday]
+lunch = []
+dinner = []
+
+[friday]
+lunch = []
+dinner = []
+
+[saturday]
+lunch = ["tomato-egg-noodles"]
+dinner = []
+
+[sunday]
+lunch = []
+dinner = [
+  { recipe = "cola-wings", servings = 4 },
+  { recipe = "choy-sum", servings = 4 },
+  { recipe = "rice", servings = 4 },
+]

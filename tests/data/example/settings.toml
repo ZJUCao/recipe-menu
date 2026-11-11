@@ -1,0 +1,4 @@
+# recipe-menu settings
+language = "en"              # "en" or "zh"
+meals = ["lunch", "dinner"]  # from "breakfast", "lunch", and "dinner", in this order
+servings = 2                 # the servings of a dish that gives none

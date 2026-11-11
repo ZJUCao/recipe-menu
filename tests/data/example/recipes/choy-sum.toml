@@ -1,0 +1,22 @@
+name = { zh = "清炒菜心", en = "Stir-fried choy sum" }
+servings = 2
+tags = ["快手", "素"]
+
+ingredients = [
+  { item = "菜心", amount = "1 斤" },
+  { item = "大蒜", amount = "3 瓣", note = { zh = "拍碎", en = "crushed" } },
+  { item = "盐", amount = "适量" },
+  { item = "食用油", amount = "1 tbsp" },
+]
+
+[steps]
+zh = [
+  "菜心洗净，沥干。",
+  "热锅下油，爆香蒜末。",
+  "下菜心大火快炒至软，加盐调味。",
+]
+en = [
+  "Wash the choy sum and drain it.",
+  "Heat the oil and fry the garlic until fragrant.",
+  "Add the choy sum, stir-fry over high heat until soft, and season with salt.",
+]

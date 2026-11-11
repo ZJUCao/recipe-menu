@@ -1,0 +1,26 @@
+name = { zh = "麻婆豆腐", en = "Mapo tofu" }
+servings = 2
+tags = ["辣", "家常"]
+
+ingredients = [
+  { item = "豆腐", amount = "1 块", note = { zh = "切丁", en = "diced" } },
+  { item = "猪肉末", amount = "100 g" },
+  { item = "郫县豆瓣酱", amount = "1 tbsp" },
+  { item = "花椒", amount = "1 tsp" },
+  { item = "大蒜", amount = "2 瓣" },
+  { item = "葱", amount = "1 根" },
+  { item = "生抽", amount = "1 tbsp" },
+  { item = "食用油", amount = "2 tbsp" },
+]
+
+[steps]
+zh = [
+  "豆腐切丁，用热盐水焯一下。",
+  "热油炒香肉末、豆瓣酱、花椒和蒜。",
+  "加水和生抽，下豆腐煮 5 分钟，撒上葱花。",
+]
+en = [
+  "Dice the tofu and blanch it in hot salted water.",
+  "Heat the oil and fry the pork, doubanjiang, Sichuan pepper, and garlic.",
+  "Add water and soy sauce, simmer the tofu for 5 minutes, and scatter the scallion on top.",
+]
