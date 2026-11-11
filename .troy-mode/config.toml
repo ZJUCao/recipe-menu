@@ -93,4 +93,6 @@ mode = "strict"
 # How many features, the first in the requirements' topological order, have
 # their design PR and test plan PR approved by Troy. troy-mode merges every
 # other PR once its checks and reviews pass. 0 means none. Default 3.
-# troy_approves_first = 3
+# Troy decided on 2026-11-11, after F03, to keep approving the design and
+# test plan of every feature: all 16, F01 to F16.
+troy_approves_first = 16
