@@ -2,8 +2,23 @@
 
 from dataclasses import dataclass
 
+from recipe_menu.catalog._matching import is_blank
 from recipe_menu.lang import BiText
 from recipe_menu.units import Unit
+
+
+def _check_both_names(name: BiText) -> None:
+    """Checks that a name has both languages, each with more than whitespace.
+
+    Args:
+        name: The names of an ingredient or a tag.
+
+    Raises:
+        ValueError: A language is ``None`` or holds only whitespace.
+    """
+    for text in (name.en, name.zh):
+        if text is None or is_blank(text):
+            raise ValueError("both names must be set and hold more than whitespace")
 
 
 @dataclass(frozen=True, slots=True)
@@ -12,7 +27,7 @@ class Category:
 
     Two categories are equal when all their fields are equal, and a ``Category`` is hashable.
 
-    The constructor checks its values. The mock leaves these checks out.
+    The constructor checks its values.
 
     Attributes:
         key: The category's key, which an ingredient's ``category`` names, such as ``produce``.
@@ -29,6 +44,18 @@ class Category:
     key: str
     name: BiText
 
+    def __post_init__(self) -> None:
+        """Checks the key and the names.
+
+        Raises:
+            ValueError: ``key`` is blank, or a language of ``name`` that is set is blank.
+        """
+        if is_blank(self.key):
+            raise ValueError("the key of a category must hold more than whitespace")
+        for text in (self.name.en, self.name.zh):
+            if text is not None and is_blank(text):
+                raise ValueError("a name of a category must hold more than whitespace")
+
 
 @dataclass(frozen=True, slots=True)
 class Ingredient:
@@ -38,7 +65,7 @@ class Ingredient:
     hashable. A ``Catalog`` holds no two ingredients with matching names, so two equal
     ingredients of one catalog are the same object.
 
-    The constructor checks its values. The mock leaves these checks out.
+    The constructor checks its values.
 
     Attributes:
         name: The names in English and Chinese. Both are set, and each holds more than
@@ -55,6 +82,14 @@ class Ingredient:
     category: Category
     unit: Unit | None = None
 
+    def __post_init__(self) -> None:
+        """Checks the names.
+
+        Raises:
+            ValueError: A language of ``name`` is ``None`` or blank.
+        """
+        _check_both_names(self.name)
+
 
 @dataclass(frozen=True, slots=True)
 class Tag:
@@ -62,7 +97,7 @@ class Tag:
 
     Two tags are equal when their names are equal, and a ``Tag`` is hashable.
 
-    The constructor checks its values. The mock leaves these checks out.
+    The constructor checks its values.
 
     Attributes:
         name: The names in English and Chinese. Both are set, and each holds more than
@@ -73,6 +108,14 @@ class Tag:
     """
 
     name: BiText
+
+    def __post_init__(self) -> None:
+        """Checks the names.
+
+        Raises:
+            ValueError: A language of ``name`` is ``None`` or blank.
+        """
+        _check_both_names(self.name)
 
 
 @dataclass(frozen=True, slots=True)

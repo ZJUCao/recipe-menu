@@ -31,8 +31,6 @@ class Problem:
     The constructor checks its values by rendering ``message`` once in both languages, so wrong
     values fail at once. It also sorts ``values`` by name, so their order does not matter.
 
-    The mock leaves these checks out.
-
     Attributes:
         severity: An error or a warning.
         file: The file, relative to the data folder, from ``DataFolder.relative``. Not an
@@ -56,6 +54,53 @@ class Problem:
     place: BiText | None
     message: Message
     values: tuple[tuple[str, MessageValue], ...] = ()
+
+    def __post_init__(self) -> None:
+        """Checks the values by rendering the message in both languages, and sorts them.
+
+        Raises:
+            ValueError: ``file`` is an absolute path, a name appears twice in ``values``, or the
+                names are not exactly the placeholders of ``message``, or an ``int`` has too
+                many digits.
+            TypeError: A value is not a ``str``, an ``int``, or a ``BiText``, or it is a ``bool``
+                or an ``enum.Enum`` member.
+        """
+        if self.file.is_absolute():
+            raise ValueError(f"the file of a problem must be relative: {self.file}")
+        names = [name for name, _ in self.values]
+        if len(set(names)) != len(names):
+            raise ValueError("a name appears twice in the values of a problem")
+        values = dict(self.values)
+        for lang in Lang:
+            self.message.render(lang, **values)
+        object.__setattr__(self, "values", tuple(sorted(self.values, key=lambda pair: pair[0])))
+
+    @classmethod
+    def _make(
+        cls,
+        severity: Severity,
+        file: Path,
+        place: BiText | None,
+        message: Message,
+        values: dict[str, MessageValue],
+    ) -> Problem:
+        """Makes a problem of a severity, with its values as pairs.
+
+        Args:
+            severity: The severity.
+            file: The file, relative to the data folder.
+            place: The place in the file, or ``None``.
+            message: What is wrong.
+            values: The value of each placeholder, by its name.
+
+        Returns:
+            The ``Problem``.
+
+        Raises:
+            ValueError: As the constructor.
+            TypeError: As the constructor.
+        """
+        return cls(severity, file, place, message, tuple(values.items()))
 
     @classmethod
     def error(
@@ -86,9 +131,8 @@ class Problem:
                 the placeholders of ``message``, or an ``int`` value has more than 4,300 digits.
             TypeError: A value is not a ``str``, an ``int``, or a ``BiText``, or it is a
                 ``bool`` or an ``enum.Enum`` member.
-            NotImplementedError: In the mock.
         """
-        raise NotImplementedError
+        return cls._make(Severity.ERROR, file, place, message, values)
 
     @classmethod
     def warning(
@@ -119,9 +163,8 @@ class Problem:
                 the placeholders of ``message``, or an ``int`` value has more than 4,300 digits.
             TypeError: A value is not a ``str``, an ``int``, or a ``BiText``, or it is a
                 ``bool`` or an ``enum.Enum`` member.
-            NotImplementedError: In the mock.
         """
-        raise NotImplementedError
+        return cls._make(Severity.WARNING, file, place, message, values)
 
     def text(self, lang: Lang) -> str:
         """Writes the message of the problem in one language.
@@ -131,8 +174,5 @@ class Problem:
 
         Returns:
             ``message.render(lang, **values)``, with the values of the problem.
-
-        Raises:
-            NotImplementedError: In the mock.
         """
-        raise NotImplementedError
+        return self.message.render(lang, **dict(self.values))
