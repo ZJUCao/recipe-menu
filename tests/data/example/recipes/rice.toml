@@ -1,0 +1,17 @@
+name = { zh = "米饭", en = "Steamed rice" }
+servings = 2
+tags = ["主食"]
+
+ingredients = [
+  { item = "大米", amount = "160 g" },
+]
+
+[steps]
+zh = [
+  "大米淘洗干净，加水浸泡 20 分钟。",
+  "用电饭煲煮熟，焖 10 分钟。",
+]
+en = [
+  "Rinse the rice, add water, and soak it for 20 minutes.",
+  "Cook it in a rice cooker, and let it rest for 10 minutes.",
+]

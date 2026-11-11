@@ -1,0 +1,18 @@
+name = { zh = "红烧肉", en = "Red-braised pork belly" }
+servings = 2
+tags = ["家常"]
+
+ingredients = [
+  { item = "五花肉", amount = "1 斤", note = { zh = "切成 3 厘米见方的块", en = "cut into 3 cm cubes" } },
+  { item = "冰糖", amount = "30 g" },
+  { item = "生抽", amount = "2 tbsp" },
+  { item = "姜", amount = "3 片" },
+  { item = "葱", amount = "2 根" },
+]
+
+[steps]
+zh = [
+  "五花肉切块，冷水下锅焯水。",
+  "小火炒冰糖至焦糖色，下肉块翻炒上色。",
+  "加生抽、姜片、葱和热水，小火炖 60 分钟，再大火收汁。",
+]

@@ -1,0 +1,23 @@
+name = { zh = "可乐鸡翅", en = "Cola chicken wings" }
+servings = 2
+tags = ["家常"]
+
+ingredients = [
+  { item = "鸡翅中", amount = "500 g" },
+  { item = "可乐", amount = "1 罐" },
+  { item = "姜", amount = "3 片" },
+  { item = "葱", amount = "1 根" },
+  { item = "生抽", amount = "2 tbsp" },
+]
+
+[steps]
+zh = [
+  "鸡翅焯水，沥干。",
+  "把鸡翅煎至两面金黄，加姜片、葱和生抽。",
+  "倒入可乐，小火煮 20 分钟，再大火收汁。",
+]
+en = [
+  "Blanch the wings and drain them.",
+  "Pan-fry the wings until golden on both sides, and add the ginger, scallion, and soy sauce.",
+  "Pour in the cola, simmer for 20 minutes, and reduce the sauce over high heat.",
+]

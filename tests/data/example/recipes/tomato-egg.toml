@@ -1,0 +1,26 @@
+name = { zh = "番茄炒蛋", en = "Tomato and egg stir-fry" }
+servings = 2
+tags = ["快手", "家常"]
+
+ingredients = [
+  { item = "番茄", amount = "300 g", note = { zh = "切块", en = "cut into wedges" } },
+  { item = "鸡蛋", amount = "3" },
+  { item = "葱", amount = "1 根", note = { zh = "切葱花", en = "chopped" } },
+  { item = "盐", amount = "适量" },
+  { item = "糖", amount = "1 tsp" },
+  { item = "食用油", amount = "2 tbsp" },
+]
+
+[steps]
+zh = [
+  "番茄切块。鸡蛋加少许盐打散。",
+  "热锅下 1 汤匙油，炒鸡蛋至刚凝固，盛出。",
+  "下剩下的油，炒番茄至软，加糖。",
+  "倒回鸡蛋，加盐调味，撒上葱花。",
+]
+en = [
+  "Cut the tomatoes into wedges. Beat the eggs with a pinch of salt.",
+  "Heat 1 tbsp of oil. Scramble the eggs until just set, and take them out.",
+  "Heat the rest of the oil. Stir-fry the tomatoes until soft, and add the sugar.",
+  "Return the eggs, season with salt, and scatter the scallion on top.",
+]

@@ -1,0 +1,24 @@
+name = { zh = "番茄鸡蛋面", en = "Tomato and egg noodles" }
+servings = 2
+tags = ["快手", "主食"]
+
+ingredients = [
+  { item = "面条", amount = "200 g" },
+  { item = "番茄", amount = "300 g" },
+  { item = "鸡蛋", amount = "2" },
+  { item = "葱", amount = "1 根" },
+  { item = "盐", amount = "适量" },
+  { item = "白胡椒粉", amount = "适量" },
+]
+
+[steps]
+zh = [
+  "番茄切块，鸡蛋打散，葱切葱花。",
+  "炒鸡蛋和番茄，加水煮开，调入盐和白胡椒粉。",
+  "下面条煮熟，撒上葱花。",
+]
+en = [
+  "Cut the tomatoes into wedges, beat the eggs, and chop the scallion.",
+  "Stir-fry the eggs and tomatoes, add water, bring it to a boil, and season with salt and white pepper.",
+  "Add the noodles, cook them through, and scatter the scallion on top.",
+]
