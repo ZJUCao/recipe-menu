@@ -14,8 +14,9 @@ def choose_lang(option: Lang | None, setting: Lang | None) -> Lang:
     Returns:
         ``option`` when it is not ``None``, else ``setting`` when it is not ``None``, else
         ``Lang.EN``.
-
-    Raises:
-        NotImplementedError: In the mock.
     """
-    raise NotImplementedError
+    if option is not None:
+        return option
+    if setting is not None:
+        return setting
+    return Lang.EN
