@@ -1,8 +1,44 @@
 """Reading ``pantry.toml`` into a pantry."""
 
 from recipe_menu.catalog._catalog import Catalog
-from recipe_menu.catalog._model import Pantry
-from recipe_menu.datafile import DataFolder, Problem
+from recipe_menu.catalog._model import Ingredient, Pantry
+from recipe_menu.catalog._shape import Report, read_list, report_unknown_keys
+from recipe_menu.catalog.messages import ITEM_N, PANTRY, UNKNOWN_INGREDIENT
+from recipe_menu.datafile import EMPTY_ITEM, ITEM_NOT_A_TEXT, DataFolder, Problem, read_toml
+
+
+def _read_item(
+    item: object,
+    number: int,
+    catalog: Catalog | None,
+    report: Report,
+) -> Ingredient | None:
+    """Reads one item of the pantry list.
+
+    Args:
+        item: The item, as the file gives it.
+        number: The number of the item, counted from 1.
+        catalog: The catalog that names come from, or ``None``.
+        report: Where the problems go.
+
+    Returns:
+        The ingredient that the item names, or ``None`` when the item has a problem or when
+        ``catalog`` is ``None``.
+    """
+    place = ITEM_N.to_bitext(number=number)
+    if not isinstance(item, str):
+        report.add(place, ITEM_NOT_A_TEXT)
+        return None
+    name = item.strip()
+    if not name:
+        report.add(place, EMPTY_ITEM)
+        return None
+    if catalog is None:
+        return None
+    ingredient = catalog.find_ingredient(name)
+    if ingredient is None:
+        report.add(place, UNKNOWN_INGREDIENT, name=name)
+    return ingredient
 
 
 def read_pantry(
@@ -44,7 +80,13 @@ def read_pantry(
         * A key at the top of the file other than ``pantry`` gives ``UNKNOWN_KEY``, in its form
           for one key, with no place, and is ignored.
 
-    Raises:
-        NotImplementedError: In the mock.
     """
-    raise NotImplementedError
+    table = read_toml(folder, folder.pantry)
+    if isinstance(table, Problem):
+        return None, (table,)
+    report = Report(folder.relative(folder.pantry))
+    items = read_list(table, "pantry", PANTRY.to_bitext(), report)
+    found = {_read_item(item, number, catalog, report) for number, item in enumerate(items, 1)}
+    report_unknown_keys(table, ("pantry",), None, report)
+    pantry = None if catalog is None else Pantry(frozenset(i for i in found if i is not None))
+    return pantry, tuple(report.problems)

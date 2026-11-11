@@ -1,9 +1,45 @@
 """The catalog: categories, ingredients, and tags, with a lookup by name."""
 
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 
+from recipe_menu.catalog._matching import matching_form
 from recipe_menu.catalog._model import Category, Ingredient, Tag
+from recipe_menu.lang import BiText
+
+
+def _name_forms(name: BiText) -> set[str]:
+    """Gives the matching forms of the two names of an ingredient or a tag.
+
+    Args:
+        name: Names with both languages set.
+
+    Returns:
+        The matching forms, as one set, so that two names that match each other count once.
+    """
+    return {matching_form(text) for text in (name.en, name.zh) if text is not None}
+
+
+def _build_index[T: (Ingredient, Tag)](items: Iterable[T], kind: str) -> dict[str, T]:
+    """Builds the index from the matching form of each name to its item.
+
+    Args:
+        items: Ingredients or tags.
+        kind: The word for the items in the error message.
+
+    Returns:
+        The index.
+
+    Raises:
+        ValueError: Two items have names that match.
+    """
+    index: dict[str, T] = {}
+    for item in items:
+        forms = _name_forms(item.name)
+        if not forms.isdisjoint(index):
+            raise ValueError(f"two {kind} have names that match")
+        index.update(dict.fromkeys(forms, item))
+    return index
 
 
 @dataclass(frozen=True, slots=True)
@@ -12,10 +48,10 @@ class Catalog:
 
     Two catalogs are equal when their three tuples are equal, and a ``Catalog`` is hashable. The
     constructor builds an index of the names, so a lookup takes the same time whatever the size
-    of the catalog. The index is internal: it is not compared, hashed, or printed. The
-    implementation stores each index as a ``types.MappingProxyType``, so it cannot be changed.
+    of the catalog. The index is internal: it is not compared, hashed, or printed. Each
+    index is stored as a ``dict``, typed as a read-only ``Mapping``.
 
-    The constructor checks its values and builds the index. The mock leaves both out.
+    The constructor checks its values and builds the index.
 
     Two texts match when their matching forms are equal. The matching form of a text is the text
     without whitespace at both ends, as ``str.strip()`` removes it, with each ASCII capital
@@ -44,6 +80,22 @@ class Catalog:
     )
     _tag_index: Mapping[str, Tag] = field(init=False, repr=False, compare=False, hash=False)
 
+    def __post_init__(self) -> None:
+        """Checks the values and builds the two indexes.
+
+        Raises:
+            ValueError: The keys of two categories match, the ``category`` of an ingredient is
+                not in ``categories``, or two ingredients have matching names, or two tags do.
+        """
+        keys = {matching_form(category.key) for category in self.categories}
+        if len(keys) != len(self.categories):
+            raise ValueError("the keys of two categories match")
+        known = set(self.categories)
+        if any(ingredient.category not in known for ingredient in self.ingredients):
+            raise ValueError("the category of an ingredient is not in the catalog")
+        object.__setattr__(self, "_ingredient_index", _build_index(self.ingredients, "ingredients"))
+        object.__setattr__(self, "_tag_index", _build_index(self.tags, "tags"))
+
     def find_ingredient(self, name: str) -> Ingredient | None:
         """Finds an ingredient by its name in either language.
 
@@ -58,11 +110,8 @@ class Catalog:
             inside a text counts as written, case counts only for A to Z, look-alike letters
             such as U+212A and U+017F stay as they are, no text is normalized, and a text whose
             matching form is empty matches nothing.
-
-        Raises:
-            NotImplementedError: In the mock.
         """
-        raise NotImplementedError
+        return self._ingredient_index.get(matching_form(name))
 
     def find_tag(self, name: str) -> Tag | None:
         """Finds a tag by its name in either language.
@@ -78,8 +127,5 @@ class Catalog:
             inside a text counts as written, case counts only for A to Z, look-alike letters
             such as U+212A and U+017F stay as they are, no text is normalized, and a text whose
             matching form is empty matches nothing.
-
-        Raises:
-            NotImplementedError: In the mock.
         """
-        raise NotImplementedError
+        return self._tag_index.get(matching_form(name))

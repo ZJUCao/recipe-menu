@@ -3,6 +3,22 @@
 from dataclasses import dataclass
 from pathlib import Path
 
+_BAD_NAME_CHARACTERS = frozenset("/\\:\x00")
+
+
+def _check_name(name: str) -> None:
+    r"""Checks that a name gives the path of one file in one folder.
+
+    Args:
+        name: A recipe ID or an ISO week.
+
+    Raises:
+        ValueError: ``name`` is empty, is ``.`` or ``..``, or holds ``/``, ``\``, ``:``, or
+            U+0000.
+    """
+    if name in {"", ".", ".."} or not _BAD_NAME_CHARACTERS.isdisjoint(name):
+        raise ValueError(f"not a name of one file: {name!r}")
+
 
 @dataclass(frozen=True, slots=True)
 class DataFolder:
@@ -24,11 +40,8 @@ class DataFolder:
 
         Returns:
             ``root / "settings.toml"``.
-
-        Raises:
-            NotImplementedError: In the mock.
         """
-        raise NotImplementedError
+        return self.root / "settings.toml"
 
     @property
     def catalog(self) -> Path:
@@ -36,11 +49,8 @@ class DataFolder:
 
         Returns:
             ``root / "catalog.toml"``.
-
-        Raises:
-            NotImplementedError: In the mock.
         """
-        raise NotImplementedError
+        return self.root / "catalog.toml"
 
     @property
     def pantry(self) -> Path:
@@ -48,11 +58,8 @@ class DataFolder:
 
         Returns:
             ``root / "pantry.toml"``.
-
-        Raises:
-            NotImplementedError: In the mock.
         """
-        raise NotImplementedError
+        return self.root / "pantry.toml"
 
     @property
     def recipes(self) -> Path:
@@ -60,11 +67,8 @@ class DataFolder:
 
         Returns:
             ``root / "recipes"``.
-
-        Raises:
-            NotImplementedError: In the mock.
         """
-        raise NotImplementedError
+        return self.root / "recipes"
 
     @property
     def menus(self) -> Path:
@@ -72,11 +76,8 @@ class DataFolder:
 
         Returns:
             ``root / "menus"``.
-
-        Raises:
-            NotImplementedError: In the mock.
         """
-        raise NotImplementedError
+        return self.root / "menus"
 
     @property
     def shopping(self) -> Path:
@@ -84,11 +85,8 @@ class DataFolder:
 
         Returns:
             ``root / "shopping"``.
-
-        Raises:
-            NotImplementedError: In the mock.
         """
-        raise NotImplementedError
+        return self.root / "shopping"
 
     def recipe_file(self, recipe_id: str) -> Path:
         r"""Gives the file of a recipe.
@@ -102,9 +100,9 @@ class DataFolder:
         Raises:
             ValueError: ``recipe_id`` is empty, is ``.`` or ``..``, or holds ``/``, ``\``,
                 ``:``, or U+0000. Such a name could give the path of another file.
-            NotImplementedError: In the mock.
         """
-        raise NotImplementedError
+        _check_name(recipe_id)
+        return self.recipes / f"{recipe_id}.toml"
 
     def menu_file(self, week: str) -> Path:
         r"""Gives the file of a week's menu.
@@ -118,9 +116,9 @@ class DataFolder:
         Raises:
             ValueError: ``week`` is empty, is ``.`` or ``..``, or holds ``/``, ``\``, ``:``,
                 or U+0000.
-            NotImplementedError: In the mock.
         """
-        raise NotImplementedError
+        _check_name(week)
+        return self.menus / f"{week}.toml"
 
     def shopping_file(self, week: str) -> Path:
         r"""Gives the file of a week's shopping list.
@@ -134,9 +132,9 @@ class DataFolder:
         Raises:
             ValueError: ``week`` is empty, is ``.`` or ``..``, or holds ``/``, ``\``, ``:``,
                 or U+0000.
-            NotImplementedError: In the mock.
         """
-        raise NotImplementedError
+        _check_name(week)
+        return self.shopping / f"{week}.md"
 
     def relative(self, path: Path) -> Path:
         """Gives a path inside the data folder relative to the folder.
@@ -150,6 +148,5 @@ class DataFolder:
 
         Raises:
             ValueError: ``path`` is not inside ``root``.
-            NotImplementedError: In the mock.
         """
-        raise NotImplementedError
+        return path.relative_to(self.root)
