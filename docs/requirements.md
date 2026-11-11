@@ -1,7 +1,7 @@
 ---
 troy-doc: "requirements"
 lang: "en"
-version: "1.1"
+version: "1.2"
 updated: "2026-11-10"
 status: "Approved by Troy on 2026-11-10"
 mirror: "requirements.zh-CN.md"
@@ -115,7 +115,7 @@ Each prototype is a PowerShell session in Windows Terminal that runs the same co
 | ID | Feature | Hard dependencies | Soft dependencies | Version | Status |
 | --- | --- | --- | --- | --- | --- |
 | F01 | Quantities and units | None | None | v0.1 | Passes tests on main |
-| F02 | Bilingual terminal output | None | None | v0.1 | Not started |
+| F02 | Bilingual terminal output | None | None | v0.1 | Passes tests on main |
 | F03 | Catalog and pantry | None | F01, F02 | v0.1 | Not started |
 | F04 | Recipe files | None | F01, F02, F03 | v0.1 | Not started |
 | F05 | Command line and settings | None | F02 | v0.1 | Not started |
@@ -272,3 +272,4 @@ Topological order: F01, F02, F03, F04, F05, F06, F07, F08, F09, F10, F11, F12, F
 | 0.1 | 2026-11-10 | First draft. |
 | 1.0 | 2026-11-10 | Approved by Troy. |
 | 1.1 | 2026-11-10 | F01 passes tests on main. |
+| 1.2 | 2026-11-10 | F02 passes tests on main. |
