@@ -1,9 +1,52 @@
 """Listing the TOML files of one folder of the data folder."""
 
+import os
 from pathlib import Path
 
 from recipe_menu.datafile._folder import DataFolder
 from recipe_menu.datafile._problem import Problem
+from recipe_menu.datafile.messages import (
+    FOLDER_ACCESS_DENIED,
+    FOLDER_IS_FILE,
+    FOLDER_MISSING,
+    FOLDER_SYSTEM_ERROR,
+    TOML_ENDING_NOT_SMALL,
+)
+
+_ENDING = ".toml"
+
+
+def _is_file(path: Path) -> bool:
+    """Tells whether a path is a file, and never raises.
+
+    Args:
+        path: The path to look at.
+
+    Returns:
+        ``True`` when ``path`` is a file. ``False`` when it is not, or when the probe fails.
+    """
+    return os.path.isfile(path)  # noqa: PTH113
+
+
+def _listing_failure(relative: Path, path: Path, error: OSError) -> Problem:
+    """Makes the problem of an ``OSError`` from listing a folder.
+
+    Args:
+        relative: The folder, relative to the data folder.
+        path: The folder that could not be listed.
+        error: The error.
+
+    Returns:
+        The problem, with no place.
+    """
+    if _is_file(path):
+        return Problem.error(relative, None, FOLDER_IS_FILE)
+    if isinstance(error, FileNotFoundError | NotADirectoryError):
+        return Problem.error(relative, None, FOLDER_MISSING)
+    if isinstance(error, PermissionError):
+        return Problem.error(relative, None, FOLDER_ACCESS_DENIED)
+    reason = error.strerror or type(error).__name__
+    return Problem.error(relative, None, FOLDER_SYSTEM_ERROR, reason=reason)
 
 
 def list_toml_files(
@@ -14,8 +57,6 @@ def list_toml_files(
 
     It reads no file and writes nothing. Every kind of entry counts, a folder named ``x.toml``
     too, so ``read_toml`` later reports such a folder as a folder.
-
-    The mock only raises ``NotImplementedError``.
 
     Args:
         folder: The data folder.
@@ -51,6 +92,19 @@ def list_toml_files(
     Raises:
         ValueError: ``path`` is not inside ``folder.root``, as ``DataFolder.relative`` finds. It
             is checked before the listing.
-        NotImplementedError: Always, in the mock.
     """
-    raise NotImplementedError
+    relative = folder.relative(path)
+    try:
+        entries = [entry.name for entry in path.iterdir()]
+    except OSError as error:
+        return (), (_listing_failure(relative, path, error),)
+    names = sorted(name[: -len(_ENDING)] for name in entries if name.endswith(_ENDING))
+    capitals = sorted(
+        name
+        for name in entries
+        if name[-len(_ENDING) :].lower() == _ENDING and name[-5:] != _ENDING
+    )
+    problems = tuple(
+        Problem.error(relative / name, None, TOML_ENDING_NOT_SMALL) for name in capitals
+    )
+    return tuple(names), problems

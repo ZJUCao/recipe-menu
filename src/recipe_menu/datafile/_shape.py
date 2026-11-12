@@ -53,10 +53,8 @@ class Report:
     def warn(self, place: BiText | None, message: Message, /, **values: MessageValue) -> None:
         """Adds a warning.
 
-        The implementation appends ``Problem.warning(file, place, message, **values)`` to
-        ``problems``, so the problem has ``Severity.WARNING``.
-
-        The mock only raises ``NotImplementedError``.
+        It appends ``Problem.warning(file, place, message, **values)`` to ``problems``, so the
+        problem has ``Severity.WARNING``.
 
         Args:
             place: The place in the file, or ``None`` for a problem of the whole file.
@@ -68,9 +66,8 @@ class Report:
                 placeholders of ``message``, or an ``int`` value has more than 4,300 digits.
             TypeError: A value is not a ``str``, an ``int``, or a ``BiText``, or it is a ``bool``
                 or an ``enum.Enum`` member.
-            NotImplementedError: Always, in the mock.
         """
-        raise NotImplementedError
+        self.problems.append(Problem.warning(self.file, place, message, **values))
 
 
 def read_list(table: Mapping[str, object], key: str, place: BiText, report: Report) -> list[object]:
