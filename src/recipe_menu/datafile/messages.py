@@ -1,7 +1,8 @@
 """The messages of ``datafile``: the places in a file, the read errors, and the shape of a file.
 
 Only the eight messages for the shape of a file are exported by ``recipe_menu.datafile``. The
-others are internal to ``read_toml``.
+others, the read errors and the folder listing, are internal to the module, for ``read_toml``
+and ``list_toml_files``.
 """
 
 from typing import Final

@@ -1,6 +1,27 @@
 """The recipe IDs: the rule for an ID, and the IDs of the files in ``recipes/``."""
 
-from recipe_menu.datafile import DataFolder, Problem
+import re
+from typing import Final
+
+from recipe_menu.datafile import DataFolder, Problem, list_toml_files
+from recipe_menu.recipes.messages import NOT_A_RECIPE_ID, RESERVED_RECIPE_ID
+from recipe_menu.text import Message
+
+_ID: Final = re.compile(r"[a-z0-9][a-z0-9-]*")
+_DEVICE: Final = re.compile(r"con|prn|aux|nul|(com|lpt)[0-9]")
+
+
+def _refusal(name: str) -> Message:
+    """Chooses the message for a file name that is not a recipe ID.
+
+    Args:
+        name: The name of the file without ``.toml``.
+
+    Returns:
+        ``RESERVED_RECIPE_ID`` when ``name`` is exactly a Windows device name, and
+        ``NOT_A_RECIPE_ID`` for every other name.
+    """
+    return RESERVED_RECIPE_ID if _DEVICE.fullmatch(name) else NOT_A_RECIPE_ID
 
 
 def is_recipe_id(text: str) -> bool:
@@ -9,8 +30,6 @@ def is_recipe_id(text: str) -> bool:
     A file in ``recipes/`` is a recipe only when its name without ``.toml`` follows the rule.
     The rule rejects every name that ``DataFolder.recipe_file`` rejects, and more. It is the
     same on Windows and Linux.
-
-    The mock only raises ``NotImplementedError``.
 
     Args:
         text: A name to check, such as a file name without ``.toml`` or an ID that you typed.
@@ -27,20 +46,15 @@ def is_recipe_id(text: str) -> bool:
         ``com9``, or ``lpt0`` to ``lpt9``.
         So a capital letter, a space, ``_``, a dot, a separator, ``:``, U+0000, and every
         character outside ASCII are rejected, and so are ``Tomato-Egg``, ``-tomato``, ``rice.``,
-        and ``nul.v2``.
-
-    Raises:
-        NotImplementedError: Always, in the mock. The implementation never raises.
+        and ``nul.v2``. It never raises.
     """
-    raise NotImplementedError
+    return _ID.fullmatch(text) is not None and _DEVICE.fullmatch(text) is None
 
 
 def list_recipe_ids(folder: DataFolder) -> tuple[tuple[str, ...], tuple[Problem, ...]]:
     """Lists the recipe IDs from the file names in ``recipes/``, without reading any file.
 
     It lists ``recipes/`` through ``list_toml_files``, reads no file, and writes nothing.
-
-    The mock only raises ``NotImplementedError``.
 
     Args:
         folder: The data folder.
@@ -72,7 +86,14 @@ def list_recipe_ids(folder: DataFolder) -> tuple[tuple[str, ...], tuple[Problem,
         names and one problem, with the file ``recipes`` and no place. So ``ids`` is empty, and
         ``problems`` holds only that problem.
 
-    Raises:
-        NotImplementedError: Always, in the mock. The implementation never raises for bad data.
+        It never raises for bad data.
     """
-    raise NotImplementedError
+    names, problems = list_toml_files(folder, folder.recipes)
+    ids = tuple(name for name in names if is_recipe_id(name))
+    relative = folder.relative(folder.recipes)
+    refused = tuple(
+        Problem.error(relative / f"{name}.toml", None, _refusal(name))
+        for name in names
+        if not is_recipe_id(name)
+    )
+    return ids, problems + refused

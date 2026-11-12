@@ -1,8 +1,57 @@
 """Reading recipe files into recipes."""
 
+from collections.abc import Mapping
+
 from recipe_menu.catalog import Catalog
-from recipe_menu.datafile import DataFolder, Problem
+from recipe_menu.datafile import (
+    MISSING_KEY,
+    DataFolder,
+    Problem,
+    Report,
+    Severity,
+    read_toml,
+    report_unknown_keys,
+)
+from recipe_menu.recipes._ids import is_recipe_id, list_recipe_ids
 from recipe_menu.recipes._model import Recipe
+from recipe_menu.recipes._read_lines import read_ingredients, read_tags
+from recipe_menu.recipes._read_steps import read_name, read_steps
+from recipe_menu.recipes.messages import (
+    SERVINGS,
+    SERVINGS_NOT_A_NUMBER,
+    SERVINGS_TOO_FEW,
+    SERVINGS_TOO_MANY,
+)
+
+_KEYS = ("name", "servings", "tags", "ingredients", "steps")
+_MAX_DIGITS_VALUE = 999_999_999_999_999
+
+
+def _read_servings(table: Mapping[str, object], report: Report) -> int | None:
+    """Reads the servings of the recipe.
+
+    Args:
+        table: The table of the file.
+        report: Where the problem goes.
+
+    Returns:
+        The servings from 1 to 100, or ``None`` after a problem. A number is shown in a message
+        only when it has at most 15 digits.
+    """
+    if "servings" not in table:
+        report.add(None, MISSING_KEY, key="servings")
+        return None
+    value = table["servings"]
+    place = SERVINGS.to_bitext()
+    if isinstance(value, bool) or not isinstance(value, int) or abs(value) > _MAX_DIGITS_VALUE:
+        report.add(place, SERVINGS_NOT_A_NUMBER)
+    elif value < 1:
+        report.add(place, SERVINGS_TOO_FEW, servings=value)
+    elif value > 100:
+        report.add(place, SERVINGS_TOO_MANY, servings=value)
+    else:
+        return value
+    return None
 
 
 def read_recipe(
@@ -14,8 +63,6 @@ def read_recipe(
 
     It reads ``recipes/<id>.toml`` through ``read_toml``. It lists no folder and writes nothing.
     It checks the whole file and never raises for bad data, so one run reports every problem.
-
-    The mock only raises ``NotImplementedError``.
 
     Args:
         folder: The data folder.
@@ -56,10 +103,11 @@ def read_recipe(
         place of every problem of a note is ``ingredient N``. A missing key at the top has no place.
 
         A language of the name, of a note, or of the steps is missing when its key is missing,
-        or when it holds a blank text, or in the steps the empty list. It is usable when it
-        holds a text with more than whitespace, or in the steps a list with such a text. It is
-        wrong when it holds anything else, and the steps hold only lists, so a text in the
-        steps, even ``""``, is wrong. When one language is usable and the other is missing, the
+        or, in the name or a note, when it holds a blank text, or, in the steps, when it holds
+        the empty list. It is usable when it holds a text with more than whitespace, or in the
+        steps a list with such a text. It is wrong when it holds anything else, and the steps
+        hold only lists, so a text in the steps, even ``""``, is wrong. So a blank text in the
+        steps is never read as missing. When one language is usable and the other is missing, the
         missing one gets a warning, and when both are missing the name gets ``NO_NAME`` and the
         steps get ``NO_STEPS``. A note with both languages missing is no note.
 
@@ -78,8 +126,8 @@ def read_recipe(
         order above. ``servings`` is the number from the file, shown only when it has at most
         15 digits (see check (a) below). ``tag`` is the item without whitespace at both ends.
         ``name`` is ``item`` without whitespace at both ends. ``amount`` is the text of the
-        ``WrongQuantity``, and ``unit`` is its unit.
-        ``ingredient`` is the name of the ingredient as its ``BiText``. ``number`` is N.
+        ``WrongQuantity``, and ``unit`` is its unit. ``ingredient`` is the name of the
+        ingredient as its ``BiText``. ``number`` is N.
 
         The checks, and the problem that each gives, are these. Every problem is an error,
         except the warnings in (f).
@@ -99,10 +147,10 @@ def read_recipe(
 
         (d) A missing key at the top, any of the five, gives ``MISSING_KEY`` with no place. A
         ``tags`` or ``ingredients`` that is not a list gives ``NOT_A_LIST`` at the list. A tag or
-        a step that is not a text
-        gives ``ITEM_NOT_A_TEXT``, and a blank one gives ``EMPTY_ITEM``, at ``tag N``,
-        ``Chinese step N``, or ``English step N``. A tag that ``find_tag`` does not find gives
-        ``UNKNOWN_TAG``. A tag that an earlier item already named gives no problem.
+        a step that is not a text gives ``ITEM_NOT_A_TEXT``, and a blank one gives
+        ``EMPTY_ITEM``, at ``tag N``, ``Chinese step N``, or ``English step N``. A tag that
+        ``find_tag`` does not find gives ``UNKNOWN_TAG``. A tag that an earlier item already
+        named gives no problem.
 
         (e) An ingredient that is not a table gives ``NOT_A_TABLE``. ``item`` is required, and
         when it is missing, not a text, or blank it gives ``MISSING_KEY``, ``NOT_A_TEXT``, or
@@ -124,9 +172,25 @@ def read_recipe(
 
     Raises:
         ValueError: ``is_recipe_id(recipe_id)`` is false. It is checked before the file is read.
-        NotImplementedError: Always, in the mock.
     """
-    raise NotImplementedError
+    if not is_recipe_id(recipe_id):
+        raise ValueError(f"not a recipe ID: {recipe_id!r}")
+    path = folder.recipe_file(recipe_id)
+    table = read_toml(folder, path)
+    if isinstance(table, Problem):
+        return None, (table,)
+    report = Report(folder.relative(path))
+    name = read_name(table, report)
+    servings = _read_servings(table, report)
+    tags = read_tags(table, catalog, report)
+    ingredients = read_ingredients(table, catalog, report)
+    steps = read_steps(table, report)
+    report_unknown_keys(table, _KEYS, None, report)
+    problems = tuple(report.problems)
+    failed = any(problem.severity is Severity.ERROR for problem in problems)
+    if catalog is None or failed or name is None or servings is None or steps is None:
+        return None, problems
+    return Recipe(recipe_id, name, servings, tags, ingredients, steps), problems
 
 
 def read_recipes(
@@ -139,8 +203,6 @@ def read_recipes(
     the IDs. It lists ``recipes/`` once through ``list_toml_files``, reads each recipe file once
     through ``read_toml``, and writes nothing. It never raises for bad data.
 
-    The mock only raises ``NotImplementedError``.
-
     Args:
         folder: The data folder.
         catalog: The catalog, as for ``read_recipe``, or ``None`` when the catalog could not be
@@ -152,8 +214,13 @@ def read_recipes(
         empty when ``catalog`` is ``None``. ``problems`` holds the problems of
         ``list_recipe_ids``, and then the problems that ``read_recipe`` gives for each ID, in
         the order of the IDs.
-
-    Raises:
-        NotImplementedError: Always, in the mock.
     """
-    raise NotImplementedError
+    ids, problems = list_recipe_ids(folder)
+    recipes: list[Recipe] = []
+    found = list(problems)
+    for recipe_id in ids:
+        recipe, recipe_problems = read_recipe(folder, catalog, recipe_id)
+        found.extend(recipe_problems)
+        if recipe is not None:
+            recipes.append(recipe)
+    return tuple(recipes), tuple(found)
