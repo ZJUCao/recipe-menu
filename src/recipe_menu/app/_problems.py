@@ -3,14 +3,14 @@
 from collections.abc import Iterable
 
 from recipe_menu.app._context import Context
-from recipe_menu.datafile import Problem
+from recipe_menu.app.messages import FILE_AT_PLACE
+from recipe_menu.datafile import Problem, Severity
 from recipe_menu.lang import Lang
+from recipe_menu.text import RUN_CHECK
 
 
 def problem_lines(problem: Problem, lang: Lang) -> tuple[str, str]:
     r"""Gives the two lines of a problem, in the layout of the prototypes, with no indent.
-
-    The mock raises ``NotImplementedError``. The implementation follows the rules below.
 
     Args:
         problem: The problem to show.
@@ -21,34 +21,28 @@ def problem_lines(problem: Problem, lang: Lang) -> tuple[str, str]:
         place, and otherwise ``FILE_AT_PLACE`` with the file as ``str(problem.file)`` and the
         place as a ``BiText``, rendered in ``lang``. On Windows that is
         ``recipes\mapo-tofu.toml, ingredient 3`` in English. ``what`` is ``problem.text(lang)``.
-
-    Raises:
-        NotImplementedError: Always, in the mock.
     """
-    raise NotImplementedError
+    if problem.place is None:
+        where = str(problem.file)
+    else:
+        where = FILE_AT_PLACE.render(lang, file=str(problem.file), place=problem.place)
+    return where, problem.text(lang)
 
 
 def first_error(problems: Iterable[Problem]) -> Problem | None:
     """Finds the first error among the problems of a reader.
-
-    The mock raises ``NotImplementedError``. The implementation follows the rule below.
 
     Args:
         problems: The problems that a reader gave, in its order.
 
     Returns:
         The first problem with ``Severity.ERROR``, or ``None`` when there is none.
-
-    Raises:
-        NotImplementedError: Always, in the mock.
     """
-    raise NotImplementedError
+    return next((problem for problem in problems if problem.severity is Severity.ERROR), None)
 
 
 def stop_at_error(context: Context, error: Problem) -> int:
     """Ends a command at the first error in a data file.
-
-    The mock raises ``NotImplementedError``. The implementation follows the rules below.
 
     Args:
         context: The language and the error stream.
@@ -61,6 +55,9 @@ def stop_at_error(context: Context, error: Problem) -> int:
 
     Raises:
         ValueError: ``error`` has ``Severity.WARNING``. It is raised before anything is written.
-        NotImplementedError: Always, in the mock.
     """
-    raise NotImplementedError
+    if error.severity is not Severity.ERROR:
+        raise ValueError("stop_at_error needs an error, not a warning")
+    where, what = problem_lines(error, context.lang)
+    context.err.write(f"{where}\n  {what}\n{RUN_CHECK.render(context.lang)}\n")
+    return 1

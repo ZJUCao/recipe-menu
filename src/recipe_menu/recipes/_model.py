@@ -4,11 +4,10 @@ from dataclasses import dataclass
 from typing import cast
 
 from recipe_menu.catalog import Ingredient, Tag
+from recipe_menu.datafile import MAX_SERVINGS, MIN_SERVINGS
 from recipe_menu.lang import BiText, Lang
 from recipe_menu.recipes._ids import is_recipe_id
 from recipe_menu.units import Quantity
-
-_MAX_SERVINGS = 100
 
 
 def _check_texts(name: BiText, what: str) -> None:
@@ -192,5 +191,5 @@ class Recipe:
         _check_texts(self.name, "a name")
         if isinstance(self.servings, bool) or not isinstance(self.servings, int):
             raise TypeError("servings must be an int")
-        if not 1 <= self.servings <= _MAX_SERVINGS:
-            raise ValueError(f"servings must be from 1 to {_MAX_SERVINGS}")
+        if not MIN_SERVINGS <= self.servings <= MAX_SERVINGS:
+            raise ValueError(f"servings must be from {MIN_SERVINGS} to {MAX_SERVINGS}")

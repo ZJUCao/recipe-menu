@@ -13,6 +13,14 @@ MEALS: Final[Message] = Message("meals", "餐次")
 MEAL_N: Final[Message] = Message("meal {number}", "餐次 {number}")
 SERVINGS: Final[Message] = Message("servings", "份数")
 
+# The names of the meals: a label inside a sentence, and a heading at the top of a column.
+BREAKFAST_LABEL: Final[Message] = Message("breakfast", "早餐")
+LUNCH_LABEL: Final[Message] = Message("lunch", "午餐")
+DINNER_LABEL: Final[Message] = Message("dinner", "晚餐")
+BREAKFAST_HEADING: Final[Message] = Message("Breakfast", "早餐")
+LUNCH_HEADING: Final[Message] = Message("Lunch", "午餐")
+DINNER_HEADING: Final[Message] = Message("Dinner", "晚餐")
+
 # The problems of ``settings.toml`` that ``datafile`` has no message for.
 LANGUAGE_NOT_EN_OR_ZH: Final[Message] = Message(
     'The language must be "en" or "zh", not "{language}".',
