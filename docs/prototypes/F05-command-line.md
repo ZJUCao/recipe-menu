@@ -128,6 +128,7 @@ C:\Users\Troy\recipe-menu 没有数据文件夹。
 PS> recipe-menu list
 settings.toml, meals
   Unknown meal "supper". The meals are breakfast, lunch, and dinner.
+Run "recipe-menu check" to see every problem.
 PS> $LASTEXITCODE
 1
 ```

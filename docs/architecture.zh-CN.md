@@ -1,9 +1,9 @@
 ---
 troy-doc: "architecture"
 lang: "zh-CN"
-version: "1.0"
-updated: "2026-11-10"
-status: "Troy 已于 2026-11-10 批准"
+version: "2.0"
+updated: "2026-11-12"
+status: "Troy 已于 2026-11-12 批准"
 mirror-of: "architecture.md"
 ---
 
@@ -49,13 +49,13 @@ mirror-of: "architecture.md"
 | lang | `src/recipe_menu/lang/**`。由 F01 和 F02 构建。语言类型，以及有两种语言、缺一种时改用另一种的文字。 | `src/recipe_menu/lang/__init__.py` | 无 |
 | units | `src/recipe_menu/units/**`。由 F01 构建。单位和数量：用任一语言读取，换算、缩放、相加，并写出。 | `src/recipe_menu/units/__init__.py` | lang |
 | text | `src/recipe_menu/text/**`。由 F02 构建。提示类型和公用提示、语言选择、英文复数和列举、显示宽度、对齐的表格，以及控制台输出流。 | `src/recipe_menu/text/__init__.py` | lang |
-| datafile | `src/recipe_menu/datafile/**`。由 F03 创建，之后的功能按需加入写文件的部分。数据文件夹里各文件的路径、读取 TOML 文件、写文件，以及带位置的问题。 | `src/recipe_menu/datafile/__init__.py` | lang, text |
+| datafile | `src/recipe_menu/datafile/**`。由 F03 创建，之后的功能按需加入写文件的部分和公用的检查。数据文件夹里各文件的路径、读取 TOML 文件、写文件、带位置的问题，以及几个读取模块共用的值检查，比如份数。 | `src/recipe_menu/datafile/__init__.py` | lang, text |
 | catalog | `src/recipe_menu/catalog/**`。由 F03 构建。读取目录和常备清单，按任一语言的名称找到食材和标签，并报告其中的问题。 | `src/recipe_menu/catalog/__init__.py` | lang, units, text, datafile |
 | recipes | `src/recipe_menu/recipes/**`。由 F04 构建。列出菜谱 ID，读取菜谱文件，并报告其中的问题。 | `src/recipe_menu/recipes/__init__.py` | lang, units, text, datafile, catalog |
 | settings | `src/recipe_menu/settings/**`。由 F05 构建。读取设置文件：语言、几餐和默认份数。v0.2 里 F14 和 F16 加入各自的设置。 | `src/recipe_menu/settings/__init__.py` | lang, text, datafile |
 | menus | `src/recipe_menu/menus/**`。由 F06 构建。ISO 周、本周和下周、两种语言的日期和星期名，以及读取周菜单文件并报告其中的问题。 | `src/recipe_menu/menus/__init__.py` | lang, text, datafile, settings, recipes |
 | shopping | `src/recipe_menu/shopping/**`。由 F12 构建。由一个周菜单、它的菜谱、目录和常备清单生成购物清单。不读任何文件。 | `src/recipe_menu/shopping/__init__.py` | lang, units, catalog, recipes, menus |
-| app | `src/recipe_menu/app/**`。由 F05 构建。连接 cli 和各命令的值：上下文、命令描述和用法错误。 | `src/recipe_menu/app/__init__.py` | lang, text, datafile, settings |
+| app | `src/recipe_menu/app/**`。由 F05 构建。连接 cli 和各命令的值：上下文、命令描述、用法错误，以及显示数据文件中问题的那几行。 | `src/recipe_menu/app/__init__.py` | lang, text, datafile, settings |
 | check | `src/recipe_menu/commands/check/**`。由 F07 构建。check 命令。add 和 edit 复用它来检查单个菜谱。 | `src/recipe_menu/commands/check/__init__.py` | app, lang, units, text, datafile, catalog, recipes, settings, menus, shopping |
 | init | `src/recipe_menu/commands/init/**`。由 F08 构建。init 命令和它写出的示例文件。 | `src/recipe_menu/commands/init/__init__.py` | app, lang, units, text, datafile, catalog, recipes, settings, menus, shopping, check |
 | browse | `src/recipe_menu/commands/browse/**`。由 F09 构建。list 和 show 命令。 | `src/recipe_menu/commands/browse/__init__.py` | app, lang, units, text, datafile, catalog, recipes, settings, menus, shopping |
@@ -178,9 +178,9 @@ flowchart TD
 | `WeekMenu` | menus | `week: IsoWeek`，以及周一到周日每天每餐的菜。 | 只包含设置里列出的几餐。 |
 | `ShoppingList` | shopping | 这一周、餐数和菜数、按目录顺序分类分组的各行，以及菜单用到的常备食材。 | |
 | `ShoppingLine` | shopping | `ingredient: Ingredient` 和 `amounts: tuple[Quantity, ...]`，每种不能互相相加的量一个：克、毫升，以及每个计数单位。 | `amounts` 为空表示“适量”。 |
-| `Context` | app | 选定的 `Lang`、`DataFolder`、文件夹里有设置时的设置、输出流和错误流，以及今天的日期。 | 由 `cli` 构造并传给命令。v0.2 里 F15 加入输入流，F14 加入随机数生成器。 |
+| `Context` | app | 选定的 `Lang`、`DataFolder`、文件夹里的设置（读不到设置时为默认值）、输出流和错误流，以及今天的日期。 | 由 `cli` 构造并传给命令。v0.2 里 F15 加入输入流，F14 加入随机数生成器。 |
 | `Command` | app | 它的命令词，比如 `menu show`；`Message` 形式的帮助行；它的参数和选项；以及运行它并返回退出码的函数。 | 每个命令模块定义自己的命令。 |
-| `UsageError` | app | 一个 `Message` 和它的值。 | 唯一有意跨越模块的异常。`cli` 把它变成退出码 2。 |
+| `UsageError` | app | 一个 `Message` 和它的值，以及它的提示行：跟在它后面那一行的 `Message`，或者 `None`（ADR-0008）。 | 唯一有意跨越模块的异常。`cli` 把它变成退出码 2。 |
 
 ### 5.3 关系
 
@@ -194,10 +194,10 @@ flowchart TD
 | 类型 | 怎么表示 | 由谁捕获 | 退出码 | 用户看到什么 |
 | --- | --- | --- | --- | --- |
 | 数据文件里的值有错 | 读取函数返回的一列 `Problem` 值。 | 没有，因为它们是值。 | 1 | 一行写文件和位置，下一行缩进写提示，和 F07 原型一样。`check` 以外的命令遇到第一个错误就停下，并加上“运行“recipe-menu check”查看所有问题。” |
-| 语法错误，或者文件不是 UTF-8 | `tomllib.TOMLDecodeError` 或 `UnicodeDecodeError`，由 `datafile` 变成带行号的 `Problem`。 | datafile | 1 | 文件、行号，以及用所选语言写的原因。 |
+| 语法错误，或者文件不是 UTF-8 | `tomllib.TOMLDecodeError`、`tomllib` 遇到位数太多的数字或嵌套太深时抛出的普通 `ValueError` 或 `RecursionError`，或者 `UnicodeDecodeError`。`datafile` 把每一种都变成带行号的 `Problem`（ADR-0002）。 | datafile | 1 | 文件、行号，以及用所选语言写的原因。 |
 | 文件读不了或写不了 | `OSError`，由 `datafile` 变成 `Problem`。 | datafile | 1 | 文件和出了什么问题：文件不存在、没有权限，或者其他系统错误。 |
-| 缺数据文件夹、菜单或菜谱 | 命令检查的一个结果。 | 命令自己 | 1 | 一条提示，说明下一步运行什么，和原型一样。 |
-| 命令行或参数值写错 | `UsageError`，由解析器或命令抛出。 | cli | 2 | 提示，然后一行指向 `recipe-menu --help`，和 F05 原型一样。 |
+| 缺数据文件夹、菜单或菜谱 | cli 或命令检查的一个结果。 | 数据文件夹由 cli 检查，只要命令的 `FolderUse` 要求（F05 设计 2.5）。菜单或菜谱由命令自己检查（ADR-0008）。 | 1 | 一条提示，说明下一步运行什么，和原型一样。 |
+| 命令行或参数值写错 | `UsageError`，由解析器或命令抛出。 | cli | 2 | 提示，然后是错误指定的那一行，比如指向 `recipe-menu --help` 的一行，和 F05 原型一样。提示本身已经说明怎么写的错误（比如 F11 里写错的周）可以不指定这一行（ADR-0008）。 |
 | Ctrl+C | `KeyboardInterrupt`。 | cli | 130 | 不再输出任何内容。写文件是原子操作，所以不会留下写了一半的文件。 |
 | bug | 任何其他异常。 | 没有 | 1，Python 的默认值 | stderr 上的 Python 回溯信息。出现回溯信息就一定是 bug。 |
 
@@ -260,7 +260,7 @@ flowchart TD
 
 ## 11. 决策记录
 
-Troy 于 2026-11-10 批准本文档，接受了表中的每一条记录。
+Troy 于 2026-11-10 批准本文档，接受了 ADR-0001 到 ADR-0007；又于 2026-11-12 在 F05 设计里接受了 ADR-0008。
 
 | ADR | 标题 | 状态 |
 | --- | --- | --- |
@@ -271,6 +271,7 @@ Troy 于 2026-11-10 批准本文档，接受了表中的每一条记录。
 | ADR-0005 | 自己写命令行解析器，不用 argparse | 已接受 |
 | ADR-0006 | 用 uv tool 安装 recipe-menu | 已接受 |
 | ADR-0007 | 用分数表示精确的数量 | 已接受 |
+| ADR-0008 | 用法错误的提示行、数据文件夹的检查，以及 tomllib 的其他异常 | 已接受 |
 
 ## 12. 修改记录
 
@@ -278,3 +279,5 @@ Troy 于 2026-11-10 批准本文档，接受了表中的每一条记录。
 | --- | --- | --- |
 | 0.1 | 2026-11-10 | 初稿。 |
 | 1.0 | 2026-11-10 | Troy 批准。 |
+| 1.1 | 2026-11-12 | 记下 Troy 于 2026-11-12 在 F05 设计里做出的决定 A 到 C（ADR-0008）。第 6 节：用法错误显示它指定的那一行，提示本身已经说明怎么写的错误可以不指定这一行（A）。只要命令的 `FolderUse` 要求，就由 cli 检查数据文件夹是否存在，菜单或菜谱仍由命令自己检查（B）。语法错误也包括 `tomllib` 抛出的普通 `ValueError` 和 `RecursionError`（C）。第 5.2 节：`UsageError` 带有它的提示行；文件夹里读不到设置时，`Context` 里是默认的设置。第 3 节：`app` 一行写上显示问题的那几行，`datafile` 一行写上公用的值检查，比如份数。 |
+| 2.0 | 2026-11-12 | Troy 批准。 |

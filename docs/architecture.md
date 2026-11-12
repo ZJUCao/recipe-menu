@@ -1,9 +1,9 @@
 ---
 troy-doc: "architecture"
 lang: "en"
-version: "1.0"
-updated: "2026-11-10"
-status: "Approved by Troy on 2026-11-10"
+version: "2.0"
+updated: "2026-11-12"
+status: "Approved by Troy on 2026-11-12"
 mirror: "architecture.zh-CN.md"
 ---
 
@@ -49,13 +49,13 @@ The package is `recipe_menu` in `src/recipe_menu/`. Each module is a folder, and
 | lang | `src/recipe_menu/lang/**`. Built by F01 and F02. The language type, and text in two languages with its fallback to the other language. | `src/recipe_menu/lang/__init__.py` | None |
 | units | `src/recipe_menu/units/**`. Built by F01. Units and quantities: reads them in either language, converts, scales, adds, and writes them. | `src/recipe_menu/units/__init__.py` | lang |
 | text | `src/recipe_menu/text/**`. Built by F02. The message type and the shared messages, the language choice, English plurals and lists, display width, aligned tables, and the console streams. | `src/recipe_menu/text/__init__.py` | lang |
-| datafile | `src/recipe_menu/datafile/**`. Created by F03. Later features add the writes they need. The paths of the data folder's files, reading a TOML file, writing a file, and problems with their places. | `src/recipe_menu/datafile/__init__.py` | lang, text |
+| datafile | `src/recipe_menu/datafile/**`. Created by F03. Later features add the writes and the shared checks that they need. The paths of the data folder's files, reading a TOML file, writing a file, problems with their places, and the value checks that several readers share, such as the servings. | `src/recipe_menu/datafile/__init__.py` | lang, text |
 | catalog | `src/recipe_menu/catalog/**`. Built by F03. Reads the catalog and the pantry, finds ingredients and tags by name in either language, and reports their problems. | `src/recipe_menu/catalog/__init__.py` | lang, units, text, datafile |
 | recipes | `src/recipe_menu/recipes/**`. Built by F04. Lists the recipe IDs, reads recipe files, and reports their problems. | `src/recipe_menu/recipes/__init__.py` | lang, units, text, datafile, catalog |
 | settings | `src/recipe_menu/settings/**`. Built by F05. Reads the settings file: the language, the meals, and the default servings. F14 and F16 add their settings in v0.2. | `src/recipe_menu/settings/__init__.py` | lang, text, datafile |
 | menus | `src/recipe_menu/menus/**`. Built by F06. ISO weeks, this week and next week, dates and day names in both languages, and reading week menu files with their problems. | `src/recipe_menu/menus/__init__.py` | lang, text, datafile, settings, recipes |
 | shopping | `src/recipe_menu/shopping/**`. Built by F12. Builds the shopping list from a week menu, its recipes, the catalog, and the pantry. Reads no file. | `src/recipe_menu/shopping/__init__.py` | lang, units, catalog, recipes, menus |
-| app | `src/recipe_menu/app/**`. Built by F05. The values that connect cli with the commands: the context, the command description, and the usage error. | `src/recipe_menu/app/__init__.py` | lang, text, datafile, settings |
+| app | `src/recipe_menu/app/**`. Built by F05. The values that connect cli with the commands: the context, the command description, the usage error, and the lines that show a problem in a data file. | `src/recipe_menu/app/__init__.py` | lang, text, datafile, settings |
 | check | `src/recipe_menu/commands/check/**`. Built by F07. The check command. add and edit reuse it to check one recipe. | `src/recipe_menu/commands/check/__init__.py` | app, lang, units, text, datafile, catalog, recipes, settings, menus, shopping |
 | init | `src/recipe_menu/commands/init/**`. Built by F08. The init command and the example files that it writes. | `src/recipe_menu/commands/init/__init__.py` | app, lang, units, text, datafile, catalog, recipes, settings, menus, shopping, check |
 | browse | `src/recipe_menu/commands/browse/**`. Built by F09. The list and show commands. | `src/recipe_menu/commands/browse/__init__.py` | app, lang, units, text, datafile, catalog, recipes, settings, menus, shopping |
@@ -178,9 +178,9 @@ The keys and shapes of every file are those of `docs/prototypes/example-data.md`
 | `WeekMenu` | menus | `week: IsoWeek`, and the dishes of each meal of each day, Monday to Sunday. | Holds the meals that the settings name. |
 | `ShoppingList` | shopping | The week, the number of meals and of dishes, the lines grouped by category in catalog order, and the pantry ingredients that the menu uses. | |
 | `ShoppingLine` | shopping | `ingredient: Ingredient` and `amounts: tuple[Quantity, ...]`, one for each kind that cannot be added to another: grams, millilitres, and each count unit. | An empty `amounts` means "to taste". |
-| `Context` | app | The chosen `Lang`, the `DataFolder`, the settings when the folder has them, the output and error streams, and today's date. | `cli` builds it and passes it to the command. In v0.2, F15 adds the input stream and F14 adds a random generator. |
+| `Context` | app | The chosen `Lang`, the `DataFolder`, the settings of the folder or the defaults when it has none that can be read, the output and error streams, and today's date. | `cli` builds it and passes it to the command. In v0.2, F15 adds the input stream and F14 adds a random generator. |
 | `Command` | app | Its words, such as `menu show`, its help line as a `Message`, its arguments and options, and the function that runs it and returns the exit code. | Each command module defines its own. |
-| `UsageError` | app | A `Message` with its values. | The one exception that crosses modules on purpose. `cli` turns it into exit code 2. |
+| `UsageError` | app | A `Message` with its values, and its hint: the `Message` of the line that follows it, or `None` (ADR-0008). | The one exception that crosses modules on purpose. `cli` turns it into exit code 2. |
 
 ### 5.3 Relations
 
@@ -194,10 +194,10 @@ The keys and shapes of every file are those of `docs/prototypes/example-data.md`
 | Kind | How it is represented | Caught by | Exit code | What the user sees |
 | --- | --- | --- | --- | --- |
 | A wrong value in a data file | `Problem` values in a list that the reader returns. | Nobody, because they are values. | 1 | The file and the place on one line, then the message, indented, as in the F07 prototype. A command other than `check` stops at the first error and adds "Run "recipe-menu check" to see every problem." |
-| A syntax mistake, or a file that is not UTF-8 | `tomllib.TOMLDecodeError` or `UnicodeDecodeError`, which `datafile` turns into a `Problem` with the line. | datafile | 1 | The file, the line, and the reason in the chosen language. |
+| A syntax mistake, or a file that is not UTF-8 | `tomllib.TOMLDecodeError`, the plain `ValueError` or `RecursionError` that `tomllib` raises for a number of too many digits or for nesting that is too deep, or `UnicodeDecodeError`. `datafile` turns each one into a `Problem` with the line (ADR-0002). | datafile | 1 | The file, the line, and the reason in the chosen language. |
 | A file that cannot be read or written | `OSError`, which `datafile` turns into a `Problem`. | datafile | 1 | The file and what went wrong: it is missing, access is denied, or another system error. |
-| A missing data folder, menu, or recipe | A result that the command checks. | The command | 1 | One message that says what to run next, as in the prototypes. |
-| A wrong command line or argument value | `UsageError`, raised by the parser or by a command. | cli | 2 | The message, then a line that points to `recipe-menu --help`, as in the F05 prototype. |
+| A missing data folder, menu, or recipe | A result that cli or the command checks. | cli for the data folder, for each command whose `FolderUse` asks for it (F05 design 2.5). The command for a menu or a recipe (ADR-0008). | 1 | One message that says what to run next, as in the prototypes. |
+| A wrong command line or argument value | `UsageError`, raised by the parser or by a command. | cli | 2 | The message, then the line that the error names, such as one that points to `recipe-menu --help`, as in the F05 prototype. An error whose message already says what to write, such as F11's wrong week, can name no line (ADR-0008). |
 | Ctrl+C | `KeyboardInterrupt`. | cli | 130 | Nothing more. Writes are atomic, so no file is left half written. |
 | A bug | Any other exception. | Nobody | 1, Python's default | Python's traceback on stderr. A traceback always means a bug. |
 
@@ -260,7 +260,7 @@ The tool uses no third-party package at run time. The table lists what builds an
 
 ## 11. Decision records
 
-Troy accepted every record in this table on 2026-11-10 by approving this document.
+Troy accepted ADR-0001 to ADR-0007 on 2026-11-10 by approving this document, and ADR-0008 on 2026-11-12 in the F05 design.
 
 | ADR | Title | Status |
 | --- | --- | --- |
@@ -271,6 +271,7 @@ Troy accepted every record in this table on 2026-11-10 by approving this documen
 | ADR-0005 | A command-line parser of our own, without argparse | Accepted |
 | ADR-0006 | Install recipe-menu with uv tool | Accepted |
 | ADR-0007 | Exact amounts with fractions | Accepted |
+| ADR-0008 | Usage hints, the data folder check, and the other exceptions of tomllib | Accepted |
 
 ## 12. Change log
 
@@ -278,3 +279,5 @@ Troy accepted every record in this table on 2026-11-10 by approving this documen
 | --- | --- | --- |
 | 0.1 | 2026-11-10 | First draft. |
 | 1.0 | 2026-11-10 | Approved by Troy. |
+| 1.1 | 2026-11-12 | Records decisions A to C, which Troy made in the F05 design on 2026-11-12 (ADR-0008). Section 6: a usage error shows the line that it names, and an error whose message already says what to write can name no line (A). cli checks a missing data folder for each command whose `FolderUse` asks for it, and the command still checks a menu or a recipe (B). A syntax mistake also covers the plain `ValueError` and `RecursionError` of `tomllib` (C). Section 5.2: `UsageError` has its hint, and `Context` holds the default settings when the folder has none that can be read. Section 3: the `app` row names the lines that show a problem, and the `datafile` row names the shared value checks, such as the servings. |
+| 2.0 | 2026-11-12 | Approved by Troy. |
