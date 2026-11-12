@@ -11,8 +11,6 @@ class Arguments:
     option is empty or starts with ``--``. Two values are equal when their two fields are equal,
     and an ``Arguments`` is hashable.
 
-    The mock leaves out the sort and the check below.
-
     Attributes:
         values: The values of the argument, in the order of the command line, such as
             ``("tomato", "quick")``. There are as many as the argument allows.
@@ -27,19 +25,27 @@ class Arguments:
     values: tuple[str, ...] = ()
     options: tuple[tuple[str, str], ...] = ()
 
+    def __post_init__(self) -> None:
+        """Sorts the options by name and checks that each name appears once.
+
+        Raises:
+            ValueError: A name appears twice in ``options``.
+        """
+        names = [name for name, _ in self.options]
+        if len(set(names)) != len(names):
+            raise ValueError("an option name appears twice")
+        object.__setattr__(self, "options", tuple(sorted(self.options)))
+
     def option(self, name: str) -> str | None:
         """Gives the value of an option.
-
-        The mock raises ``NotImplementedError``. The implementation gives the value by the rule
-        below.
 
         Args:
             name: The name of an option, such as ``--tag``.
 
         Returns:
             The value of the option ``name``, or ``None`` when the command line does not give it.
-
-        Raises:
-            NotImplementedError: Always, in the mock.
         """
-        raise NotImplementedError
+        for key, value in self.options:
+            if key == name:
+                return value
+        return None

@@ -2,8 +2,29 @@
 
 from dataclasses import dataclass
 
+from recipe_menu.datafile import MAX_SERVINGS, MIN_SERVINGS
 from recipe_menu.lang import Lang
 from recipe_menu.settings._meal import Meal
+
+
+def _check_meals(meals: object) -> None:
+    """Checks the meals of a ``Settings``.
+
+    Args:
+        meals: The value of the field ``meals``.
+
+    Raises:
+        TypeError: ``meals`` is not a tuple, or it holds an item that is not a ``Meal``.
+        ValueError: ``meals`` is empty, holds a meal twice, or is not in the order of ``Meal``.
+    """
+    if not isinstance(meals, tuple) or not all(isinstance(meal, Meal) for meal in meals):
+        raise TypeError("meals must be a tuple of Meal")
+    if not meals:
+        raise ValueError("meals must hold at least one meal")
+    order = list(Meal)
+    positions = [order.index(meal) for meal in meals]
+    if positions != sorted(set(positions)):
+        raise ValueError("meals must hold each meal once, in the order of Meal")
 
 
 @dataclass(frozen=True, slots=True)
@@ -12,8 +33,6 @@ class Settings:
 
     ``Settings()`` gives the defaults. Two settings are equal when their three fields are equal,
     and a ``Settings`` is hashable.
-
-    The mock leaves the checks below out.
 
     Attributes:
         language: The language of the commands when the command line has no ``--lang``, or
@@ -34,3 +53,18 @@ class Settings:
     language: Lang | None = None
     meals: tuple[Meal, ...] = (Meal.LUNCH, Meal.DINNER)
     servings: int = 2
+
+    def __post_init__(self) -> None:
+        """Checks the fields.
+
+        Raises:
+            TypeError: A field has the wrong type.
+            ValueError: ``meals`` or ``servings`` has a wrong value.
+        """
+        if self.language is not None and not isinstance(self.language, Lang):
+            raise TypeError("language must be a Lang or None")
+        _check_meals(self.meals)
+        if isinstance(self.servings, bool) or not isinstance(self.servings, int):
+            raise TypeError("servings must be an int")
+        if not MIN_SERVINGS <= self.servings <= MAX_SERVINGS:
+            raise ValueError(f"servings must be from {MIN_SERVINGS} to {MAX_SERVINGS}")

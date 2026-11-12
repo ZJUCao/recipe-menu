@@ -1,13 +1,17 @@
 """The reader of ``settings.toml``."""
 
-from recipe_menu.datafile import DataFolder, Problem
+from dataclasses import replace
+from typing import Any
+
+from recipe_menu.datafile import DataFolder, Problem, Report, read_toml, report_unknown_keys
+from recipe_menu.settings._read_parts import read_language, read_meals, read_servings_key
 from recipe_menu.settings._settings import Settings
+
+_KEYS = ("language", "meals", "servings")
 
 
 def read_settings(folder: DataFolder) -> tuple[Settings | None, tuple[Problem, ...]]:
     """Reads ``settings.toml`` into a ``Settings``, and reports each problem with its place.
-
-    The mock raises ``NotImplementedError``. The implementation follows the rules below.
 
     Every key is optional. A missing key gives no problem and has its default: no language,
     lunch and dinner, and 2 servings. The file itself is required. No check gives a warning, and
@@ -33,18 +37,17 @@ def read_settings(folder: DataFolder) -> tuple[Settings | None, tuple[Problem, .
         ``NOT_A_TEXT`` and ``EMPTY_TEXT`` is ``language``.
 
         The checks of ``meals``, in this order: ``NOT_A_LIST`` at ``meals`` for a value that is
-        not a list, which comes alone, with the value ``key`` ``meals``. Then, for each item in
-        order, ``ITEM_NOT_A_TEXT`` at
-        ``meal N`` for an item that is not a text, ``EMPTY_ITEM`` at ``meal N`` for an empty
-        item or one with only whitespace, and ``UNKNOWN_MEAL`` at ``meals``, not at ``meal N``,
-        when the item without whitespace at both ends is not the value of a ``Meal``, such as
-        ``supper`` or ``Lunch``. N counts the items from 1, skipped items included. The value
-        ``meal`` of ``UNKNOWN_MEAL`` is the item without whitespace at both ends. The value
-        ``meals`` of ``UNKNOWN_MEAL`` and of ``NO_MEALS`` is ``and_list`` of the values of
-        ``Meal``, in their order. An item that names a meal that an earlier item
-        named gives no problem, and the settings hold the meal once. ``NO_MEALS`` at ``meals``
-        comes only for the empty list ``[]``, and it comes alone. A list whose items all give
-        problems gives only those problems, with no ``NO_MEALS``.
+        not a list, which comes alone, and whose value ``key`` is ``meals``. Then, for each item
+        in order, ``ITEM_NOT_A_TEXT`` at ``meal N`` for an item that is not a text,
+        ``EMPTY_ITEM`` at ``meal N`` for an empty item or one with only whitespace, and
+        ``UNKNOWN_MEAL`` at ``meals``, not at ``meal N``, when the item without whitespace at
+        both ends is not the value of a ``Meal``, such as ``supper`` or ``Lunch``. N counts the
+        items from 1, skipped items included. The value ``meal`` of ``UNKNOWN_MEAL`` is the item
+        without whitespace at both ends. The value ``meals`` of ``UNKNOWN_MEAL`` and of
+        ``NO_MEALS`` is ``and_list`` of the values of ``Meal``, in their order. An item that
+        names a meal that an earlier item named gives no problem, and the settings hold the meal
+        once. ``NO_MEALS`` at ``meals`` comes only for the empty list ``[]``, and it comes alone.
+        A list whose items all give problems gives only those problems, with no ``NO_MEALS``.
 
         The check of ``servings``: ``read_servings`` gives ``SERVINGS_NOT_A_NUMBER``,
         ``SERVINGS_TOO_FEW``, or ``SERVINGS_TOO_MANY`` at ``servings``.
@@ -53,8 +56,17 @@ def read_settings(folder: DataFolder) -> tuple[Settings | None, tuple[Problem, .
         ``language``, ``meals``, and ``servings``. Its value ``key`` is the unknown key and its
         value ``keys`` is ``and_list`` of ``language``, ``meals``, and ``servings``, in the
         form for three keys.
-
-    Raises:
-        NotImplementedError: Always, in the mock. The implementation never raises for bad data.
     """
-    raise NotImplementedError
+    table = read_toml(folder, folder.settings)
+    if isinstance(table, Problem):
+        return None, (table,)
+    report = Report(folder.relative(folder.settings))
+    language = read_language(table, report)
+    meals = read_meals(table, report)
+    servings = read_servings_key(table, report)
+    report_unknown_keys(table, _KEYS, None, report)
+    problems = tuple(report.problems)
+    if problems:
+        return None, problems
+    given: dict[str, Any] = {"language": language, "meals": meals, "servings": servings}
+    return replace(Settings(), **{k: v for k, v in given.items() if v is not None}), problems

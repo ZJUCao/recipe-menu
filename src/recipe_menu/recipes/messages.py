@@ -44,18 +44,6 @@ NO_EN_NAME: Final[Message] = Message(
     "No English name. Commands show the Chinese name instead.",
     "没有英文名称。命令会改为显示中文名称。",
 )
-SERVINGS_NOT_A_NUMBER: Final[Message] = Message(
-    "Servings must be a whole number from 1 to 100, such as 2.",
-    "份数必须是 1 到 100 之间的整数，比如 2。",
-)
-SERVINGS_TOO_FEW: Final[Message] = Message(
-    "Servings must be a whole number of 1 or more, not {servings}.",
-    "份数必须是不小于 1 的整数，不能是 {servings}。",
-)
-SERVINGS_TOO_MANY: Final[Message] = Message(
-    "Servings must be a whole number of 100 or less, not {servings}.",
-    "份数必须是不大于 100 的整数，不能是 {servings}。",
-)
 UNKNOWN_TAG: Final[Message] = Message(
     'Unknown tag "{tag}". Add it to the catalog\'s tags.',
     "未知标签“{tag}”。请把它加入目录里的标签。",

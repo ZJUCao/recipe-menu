@@ -3,6 +3,17 @@
 from enum import StrEnum
 
 from recipe_menu.lang import BiText
+from recipe_menu.settings.messages import (
+    BREAKFAST_HEADING,
+    BREAKFAST_LABEL,
+    DINNER_HEADING,
+    DINNER_LABEL,
+    LUNCH_HEADING,
+    LUNCH_LABEL,
+)
+
+_LABELS = {"breakfast": BREAKFAST_LABEL, "lunch": LUNCH_LABEL, "dinner": DINNER_LABEL}
+_HEADINGS = {"breakfast": BREAKFAST_HEADING, "lunch": LUNCH_HEADING, "dinner": DINNER_HEADING}
 
 
 class Meal(StrEnum):
@@ -28,31 +39,19 @@ class Meal(StrEnum):
     def label(self) -> BiText:
         """Gives the meal's name inside a sentence or a place.
 
-        The mock raises ``NotImplementedError``. The implementation gives the name by the rule
-        below.
-
         Returns:
             The English name is ``breakfast``, ``lunch``, or ``dinner``, as the value is. The
             Chinese name is the two characters for breakfast (U+65E9 U+9910), for lunch
             (U+5348 U+9910), or for dinner (U+665A U+9910).
-
-        Raises:
-            NotImplementedError: Always, in the mock.
         """
-        raise NotImplementedError
+        return _LABELS[self.value].to_bitext()
 
     @property
     def heading(self) -> BiText:
         """Gives the meal's name at the top of a column.
 
-        The mock raises ``NotImplementedError``. The implementation gives the name by the rule
-        below.
-
         Returns:
             The English name is ``Breakfast``, ``Lunch``, or ``Dinner``, with a capital letter.
             The Chinese name is the same as the Chinese name of ``label``.
-
-        Raises:
-            NotImplementedError: Always, in the mock.
         """
-        raise NotImplementedError
+        return _HEADINGS[self.value].to_bitext()

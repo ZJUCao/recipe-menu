@@ -16,8 +16,6 @@ class UsageError(Exception):
     Creating a ``UsageError`` renders its message once in both languages, so wrong values fail
     where the error is made.
 
-    The mock leaves these checks out.
-
     Attributes:
         message: What is wrong.
         hint: The line that follows the message, such as ``RUN_HELP_FOR_OPTIONS``, or ``None``
@@ -46,9 +44,6 @@ class UsageError(Exception):
     ) -> None:
         """Makes a usage error.
 
-        The mock raises ``NotImplementedError``. The implementation sets ``message``, ``hint``,
-        and ``values``, and checks them as the class says.
-
         Args:
             message: What is wrong. Positional only.
             hint: The line that follows the message, or ``None`` when the message already says
@@ -58,20 +53,23 @@ class UsageError(Exception):
                 and no others.
 
         Raises:
-            NotImplementedError: Always, in the mock.
             ValueError: The names of ``values`` are not exactly the placeholders of ``message``.
             TypeError: A value is not a ``str``, an ``int``, or a ``BiText``, or it is a ``bool``
                 or an ``enum.Enum`` member.
             ValueError: An ``int`` value has more than 4,300 digits.
             ValueError: ``hint`` has a placeholder.
         """
-        raise NotImplementedError
+        if hint is not None and hint.placeholders:
+            raise ValueError("the hint has a placeholder")
+        english = message.render(Lang.EN, **values)
+        message.render(Lang.ZH, **values)
+        super().__init__(english)
+        self.message = message
+        self.hint = hint
+        self.values = tuple(sorted(values.items(), key=lambda pair: pair[0]))
 
     def text(self, lang: Lang) -> str:
         """Gives the message in a language.
-
-        The mock raises ``NotImplementedError``. The implementation gives the text by the rule
-        below.
 
         Args:
             lang: The language that ``text`` writes.
@@ -79,8 +77,5 @@ class UsageError(Exception):
         Returns:
             ``message.render(lang, **values)``. ``cli`` writes it, and then ``hint.render(lang)``
             when ``hint`` is not ``None``, each on its own line, to the error stream.
-
-        Raises:
-            NotImplementedError: Always, in the mock.
         """
-        raise NotImplementedError
+        return self.message.render(lang, **dict(self.values))

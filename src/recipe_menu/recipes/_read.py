@@ -9,6 +9,7 @@ from recipe_menu.datafile import (
     Problem,
     Report,
     Severity,
+    read_servings,
     read_toml,
     report_unknown_keys,
 )
@@ -16,15 +17,9 @@ from recipe_menu.recipes._ids import is_recipe_id, list_recipe_ids
 from recipe_menu.recipes._model import Recipe
 from recipe_menu.recipes._read_lines import read_ingredients, read_tags
 from recipe_menu.recipes._read_steps import read_name, read_steps
-from recipe_menu.recipes.messages import (
-    SERVINGS,
-    SERVINGS_NOT_A_NUMBER,
-    SERVINGS_TOO_FEW,
-    SERVINGS_TOO_MANY,
-)
+from recipe_menu.recipes.messages import SERVINGS
 
 _KEYS = ("name", "servings", "tags", "ingredients", "steps")
-_MAX_DIGITS_VALUE = 999_999_999_999_999
 
 
 def _read_servings(table: Mapping[str, object], report: Report) -> int | None:
@@ -35,23 +30,12 @@ def _read_servings(table: Mapping[str, object], report: Report) -> int | None:
         report: Where the problem goes.
 
     Returns:
-        The servings from 1 to 100, or ``None`` after a problem. A number is shown in a message
-        only when it has at most 15 digits.
+        The servings from 1 to 100, or ``None`` after a problem.
     """
     if "servings" not in table:
         report.add(None, MISSING_KEY, key="servings")
         return None
-    value = table["servings"]
-    place = SERVINGS.to_bitext()
-    if isinstance(value, bool) or not isinstance(value, int) or abs(value) > _MAX_DIGITS_VALUE:
-        report.add(place, SERVINGS_NOT_A_NUMBER)
-    elif value < 1:
-        report.add(place, SERVINGS_TOO_FEW, servings=value)
-    elif value > 100:
-        report.add(place, SERVINGS_TOO_MANY, servings=value)
-    else:
-        return value
-    return None
+    return read_servings(table["servings"], SERVINGS.to_bitext(), report)
 
 
 def read_recipe(

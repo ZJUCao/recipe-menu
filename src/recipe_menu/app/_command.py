@@ -1,13 +1,64 @@
 """The description of one command."""
 
+import re
 from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
 
 from recipe_menu.app._arguments import Arguments
 from recipe_menu.app._context import Context
-from recipe_menu.lang import BiText
+from recipe_menu.lang import BiText, Lang
 from recipe_menu.text import Message
+
+_WORD = re.compile(r"[a-z]+")
+_OPTION = re.compile(r"--[a-z][a-z-]*")
+_GLOBAL_OPTIONS = ("--lang", "--data", "--help", "--version")
+
+
+def _check_words(words: tuple[str, ...]) -> None:
+    """Checks the words of a command.
+
+    Args:
+        words: The words.
+
+    Raises:
+        ValueError: ``words`` is empty, has more than 2 words, or has a word with a character
+            other than ``a`` to ``z``.
+    """
+    if not 1 <= len(words) <= 2 or not all(_WORD.fullmatch(word) for word in words):
+        raise ValueError(f"not the words of a command: {words!r}")
+
+
+def _check_options(options: tuple[str, ...]) -> None:
+    """Checks the options of a command.
+
+    Args:
+        options: The options.
+
+    Raises:
+        ValueError: An option breaks the rule of ``options``, is a global option, or appears
+            twice.
+    """
+    for option in options:
+        if not _OPTION.fullmatch(option) or option in _GLOBAL_OPTIONS:
+            raise ValueError(f"not an option of a command: {option!r}")
+    if len(set(options)) != len(options):
+        raise ValueError("an option appears twice")
+
+
+def _form(argument: "Argument", lang: Lang) -> str:
+    """Writes an argument as the help shows it.
+
+    Args:
+        argument: The argument.
+        lang: The language of the name.
+
+    Returns:
+        The name, with ``...`` after it when it repeats, in square brackets when it is not
+        required.
+    """
+    text = argument.name.render(lang) + ("..." if argument.repeats else "")
+    return text if argument.required else f"[{text}]"
 
 
 class FolderUse(Enum):
@@ -63,8 +114,6 @@ class Command:
     own, and ``cli`` reads the command line and writes the help from them. Two commands are equal
     when their six fields are equal, and a ``Command`` is hashable.
 
-    The mock leaves the checks below out.
-
     Attributes:
         words: The command's words, such as ``("list",)`` or ``("menu", "show")``. There are 1 or
             2 words, each with only the small letters ``a`` to ``z``.
@@ -92,12 +141,22 @@ class Command:
     options: tuple[str, ...] = ()
     folder: FolderUse = FolderUse.READ
 
+    def __post_init__(self) -> None:
+        """Checks the fields.
+
+        Raises:
+            ValueError: ``words``, a message, or ``options`` breaks its rule.
+        """
+        _check_words(self.words)
+        if self.help_line.placeholders:
+            raise ValueError("the help line has a placeholder")
+        if self.argument is not None and self.argument.name.placeholders:
+            raise ValueError("the name of the argument has a placeholder")
+        _check_options(self.options)
+
     @property
     def usage(self) -> BiText:
         """Gives the command's usage, as the help and the usage errors show it.
-
-        The mock raises ``NotImplementedError``. The implementation gives the usage by the rule
-        below.
 
         Returns:
             The command's words joined by a space, and then, for a command with an argument, a
@@ -105,8 +164,12 @@ class Command:
             gives it: ``show ID``, ``search WORD...`` and ``search`` with the Chinese name and
             ``...``, or ``menu show [WEEK]`` and ``menu show`` with the Chinese name in square
             brackets. A command with no argument gives only its words, in both languages.
-
-        Raises:
-            NotImplementedError: Always, in the mock.
         """
-        raise NotImplementedError
+        words = " ".join(self.words)
+        if self.argument is None:
+            return BiText(words, words)
+        argument = self.argument
+        return BiText(
+            f"{words} {_form(argument, Lang.EN)}",
+            f"{words} {_form(argument, Lang.ZH)}",
+        )
