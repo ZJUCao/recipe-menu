@@ -5,13 +5,6 @@ from collections.abc import Callable
 from recipe_menu.catalog._catalog import Catalog
 from recipe_menu.catalog._matching import matching_form
 from recipe_menu.catalog._model import Category, Ingredient, Tag
-from recipe_menu.catalog._shape import (
-    Report,
-    read_list,
-    read_table,
-    read_text,
-    report_unknown_keys,
-)
 from recipe_menu.catalog.messages import (
     CATEGORIES,
     CATEGORY_N,
@@ -26,7 +19,17 @@ from recipe_menu.catalog.messages import (
     UNKNOWN_CATEGORY,
     UNKNOWN_UNIT,
 )
-from recipe_menu.datafile import NOT_A_TEXT, DataFolder, Problem, read_toml
+from recipe_menu.datafile import (
+    NOT_A_TEXT,
+    DataFolder,
+    Problem,
+    Report,
+    read_list,
+    read_table,
+    read_text,
+    read_toml,
+    report_unknown_keys,
+)
 from recipe_menu.lang import BiText
 from recipe_menu.text import Message, and_list
 from recipe_menu.units import Unit, parse_unit

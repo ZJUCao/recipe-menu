@@ -2,9 +2,17 @@
 
 from recipe_menu.catalog._catalog import Catalog
 from recipe_menu.catalog._model import Ingredient, Pantry
-from recipe_menu.catalog._shape import Report, read_list, report_unknown_keys
 from recipe_menu.catalog.messages import ITEM_N, PANTRY, UNKNOWN_INGREDIENT
-from recipe_menu.datafile import EMPTY_ITEM, ITEM_NOT_A_TEXT, DataFolder, Problem, read_toml
+from recipe_menu.datafile import (
+    EMPTY_ITEM,
+    ITEM_NOT_A_TEXT,
+    DataFolder,
+    Problem,
+    Report,
+    read_list,
+    read_toml,
+    report_unknown_keys,
+)
 
 
 def _read_item(
