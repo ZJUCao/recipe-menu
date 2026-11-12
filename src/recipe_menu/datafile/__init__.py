@@ -3,6 +3,7 @@
 from recipe_menu.datafile._folder import DataFolder
 from recipe_menu.datafile._listing import list_toml_files
 from recipe_menu.datafile._problem import Problem, Severity
+from recipe_menu.datafile._servings import MAX_SERVINGS, MIN_SERVINGS, read_servings
 from recipe_menu.datafile._shape import (
     Report,
     read_list,
@@ -26,6 +27,8 @@ __all__ = [
     "EMPTY_ITEM",
     "EMPTY_TEXT",
     "ITEM_NOT_A_TEXT",
+    "MAX_SERVINGS",
+    "MIN_SERVINGS",
     "MISSING_KEY",
     "NOT_A_LIST",
     "NOT_A_TABLE",
@@ -37,6 +40,7 @@ __all__ = [
     "Severity",
     "list_toml_files",
     "read_list",
+    "read_servings",
     "read_table",
     "read_text",
     "read_toml",

@@ -1,8 +1,8 @@
 """The messages of ``datafile``: the places in a file, the read errors, and the shape of a file.
 
 Only the eight messages for the shape of a file are exported by ``recipe_menu.datafile``. The
-others, the read errors and the folder listing, are internal to the module, for ``read_toml``
-and ``list_toml_files``.
+others, the read errors, the folder listing, and the servings, are internal to the module, for
+``read_toml``, ``list_toml_files``, and ``read_servings``.
 """
 
 from typing import Final
@@ -141,4 +141,18 @@ FOLDER_SYSTEM_ERROR: Final[Message] = Message(
 TOML_ENDING_NOT_SMALL: Final[Message] = Message(
     'The file name must end with ".toml" in small letters. Rename the file.',
     "文件名必须以小写的“.toml”结尾。请给文件改名。",
+)
+
+# Why a servings number is wrong, from ``read_servings``. These are internal to ``datafile``.
+SERVINGS_NOT_A_NUMBER: Final[Message] = Message(
+    "Servings must be a whole number from 1 to 100, such as 2.",
+    "份数必须是 1 到 100 之间的整数，比如 2。",
+)
+SERVINGS_TOO_FEW: Final[Message] = Message(
+    "Servings must be a whole number of 1 or more, not {servings}.",
+    "份数必须是不小于 1 的整数，不能是 {servings}。",
+)
+SERVINGS_TOO_MANY: Final[Message] = Message(
+    "Servings must be a whole number of 100 or less, not {servings}.",
+    "份数必须是不大于 100 的整数，不能是 {servings}。",
 )
