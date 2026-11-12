@@ -1,9 +1,9 @@
 ---
 troy-doc: "ADR-0002"
 lang: "zh-CN"
-version: "1.0"
-updated: "2026-11-10"
-status: "Troy 已于 2026-11-10 批准"
+version: "2.0"
+updated: "2026-11-12"
+status: "Troy 已于 2026-11-12 批准"
 mirror-of: "ADR-0002-toml-data-files.md"
 ---
 
@@ -20,7 +20,7 @@ mirror-of: "ADR-0002-toml-data-files.md"
 ## 3. 决定
 
 - 每个数据文件都是 TOML 1.0，格式与 `docs/prototypes/example-data.md` 相同，扩展名为 `.toml`。总体架构第 5.1 节列出这些文件。
-- `datafile` 以字节读取文件，按 UTF-8 解码（带不带字节顺序标记都可以），再用 `tomllib` 解析。语法错误给出行号：Python 有 `tomllib.TOMLDecodeError` 的 `lineno` 属性时（3.14）取这个属性，在 Python 3.13 上取错误信息末尾的 “(at line N, column M)”。
+- `datafile` 以字节读取文件，按 UTF-8 解码（带不带字节顺序标记都可以），再用 `tomllib` 解析。语法错误给出行号：Python 有 `tomllib.TOMLDecodeError` 的 `lineno` 属性时（3.14）取这个属性，在 Python 3.13 上取错误信息末尾的 “(at line N, column M)”。遇到超过 4,300 位的十进制整数时，`tomllib` 抛出普通的 `ValueError`；遇到嵌套太深时，抛出 `RecursionError`。`datafile` 也捕获这两个异常，把每一个都变成带行号的 `Problem`（F03 设计 2.3）。
 - 值错误写出字段，比如“食材 3”，因为 `tomllib` 不给出值的位置。这正是需求第 3 节的要求。
 - 创建文件的命令写出代码按模板生成的文本。工具没有 TOML 写入器。
 - v0.2 的 `menu suggest` 怎么修改已有的菜单文件，在 F14 的设计里决定。它要么只改写空餐所在的行，要么使用能保留文件排版的库（比如 tomlkit），而后者是 R16 下的新依赖。
@@ -45,3 +45,11 @@ mirror-of: "ADR-0002-toml-data-files.md"
 
 - 功能：F03、F04、F05、F06、F07、F08、F11、F14、F15
 - 规则：R16
+
+## 7. 修改记录
+
+| 版本 | 日期 | 修改 |
+| --- | --- | --- |
+| 1.0 | 2026-11-10 | Troy 批准 `docs/architecture.md` 时一并批准。 |
+| 1.1 | 2026-11-12 | 第 3 节写上 `tomllib` 抛出、`datafile` 也捕获的普通 `ValueError` 和 `RecursionError`。Troy 于 2026-11-12 在 F05 设计里做出这个决定（决定 C，ADR-0008）。 |
+| 2.0 | 2026-11-12 | Troy 批准。 |
