@@ -1,16 +1,16 @@
-"""The checks of the shape of a data file that the readers of ``catalog`` share."""
+"""The checks of the shape of a data file that the readers share."""
 
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 
-from recipe_menu.datafile import (
+from recipe_menu.datafile._problem import Problem
+from recipe_menu.datafile.messages import (
     EMPTY_TEXT,
     MISSING_KEY,
     NOT_A_LIST,
     NOT_A_TABLE,
     NOT_A_TEXT,
     UNKNOWN_KEY,
-    Problem,
 )
 from recipe_menu.lang import BiText
 from recipe_menu.text import Message, MessageValue, and_list
@@ -21,7 +21,8 @@ class Report:
 
     Attributes:
         file: The file, relative to the data folder.
-        problems: The problems, each with ``Severity.ERROR``, in the order they were found.
+        problems: The problems, in the order they were found. ``add`` gives each one
+            ``Severity.ERROR``, and ``warn`` gives each one ``Severity.WARNING``.
     """
 
     def __init__(self, file: Path) -> None:
@@ -40,8 +41,36 @@ class Report:
             place: The place in the file, or ``None`` for a problem of the whole file.
             message: What is wrong.
             **values: The value of each placeholder of ``message``.
+
+        Raises:
+            ValueError: ``file`` is an absolute path, the names of ``values`` are not exactly the
+                placeholders of ``message``, or an ``int`` value has more than 4,300 digits.
+            TypeError: A value is not a ``str``, an ``int``, or a ``BiText``, or it is a ``bool``
+                or an ``enum.Enum`` member.
         """
         self.problems.append(Problem.error(self.file, place, message, **values))
+
+    def warn(self, place: BiText | None, message: Message, /, **values: MessageValue) -> None:
+        """Adds a warning.
+
+        The implementation appends ``Problem.warning(file, place, message, **values)`` to
+        ``problems``, so the problem has ``Severity.WARNING``.
+
+        The mock only raises ``NotImplementedError``.
+
+        Args:
+            place: The place in the file, or ``None`` for a problem of the whole file.
+            message: What is wrong.
+            **values: The value of each placeholder of ``message``.
+
+        Raises:
+            ValueError: ``file`` is an absolute path, the names of ``values`` are not exactly the
+                placeholders of ``message``, or an ``int`` value has more than 4,300 digits.
+            TypeError: A value is not a ``str``, an ``int``, or a ``BiText``, or it is a ``bool``
+                or an ``enum.Enum`` member.
+            NotImplementedError: Always, in the mock.
+        """
+        raise NotImplementedError
 
 
 def read_list(table: Mapping[str, object], key: str, place: BiText, report: Report) -> list[object]:

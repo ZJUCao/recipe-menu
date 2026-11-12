@@ -122,3 +122,22 @@ UNKNOWN_KEY: Final[Plural] = Plural(
         "未知键“{key}”。可用的键：{keys}。",
     ),
 )
+
+# Why a folder cannot be listed, and a file name that ``list_toml_files`` reports.
+FOLDER_MISSING: Final[Message] = Message("The folder is missing.", "文件夹不存在。")
+FOLDER_IS_FILE: Final[Message] = Message(
+    "The folder cannot be read: it is a file.",
+    "无法读取文件夹：它是一个文件。",
+)
+FOLDER_ACCESS_DENIED: Final[Message] = Message(
+    "The folder cannot be read: access is denied.",
+    "无法读取文件夹：没有访问权限。",
+)
+FOLDER_SYSTEM_ERROR: Final[Message] = Message(
+    "The folder cannot be read. The system says: {reason}",
+    "无法读取文件夹。系统提示：{reason}",
+)
+TOML_ENDING_NOT_SMALL: Final[Message] = Message(
+    'The file name must end with ".toml" in small letters. Rename the file.',
+    "文件名必须以小写的“.toml”结尾。请给文件改名。",
+)
