@@ -154,7 +154,7 @@ def test_f04_t38_the_other_six_example_recipes(example_folder: DataFolder) -> No
         check_lines(recipe, catalog, tags, lines)
         zh_steps = tuple(data["steps"]["zh"])
         if recipe_id == "red-braised-pork":
-            assert len(zh_steps) == 3
+            assert len(zh_steps) == 4
             assert recipe.steps == Steps(zh=zh_steps)
             assert recipe.steps.exact(EN) is None
             assert recipe.steps.get(EN) == recipe.steps.exact(ZH) == zh_steps
