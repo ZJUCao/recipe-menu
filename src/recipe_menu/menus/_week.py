@@ -2,10 +2,20 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, timedelta
 
 from recipe_menu.lang import BiText
+from recipe_menu.menus.messages import (
+    MONTH_NAMES,
+    RANGE_ONE_MONTH,
+    RANGE_TWO_MONTHS,
+    RANGE_TWO_YEARS,
+)
+
+_WEEK_FORM = re.compile(r"[0-9]{4}-W[0-9]{2}")
+_DAYS_IN_WEEK = 7
 
 
 @dataclass(frozen=True, slots=True, order=True)
@@ -28,18 +38,28 @@ class IsoWeek:
         TypeError: ``year`` or ``week`` is not an ``int``, or it is a ``bool``.
         ValueError: ``year`` and ``week`` break the constraints above, such as
             ``IsoWeek(2025, 53)``, ``IsoWeek(2026, 0)``, or ``IsoWeek(9999, 52)``.
-
-    The mock leaves these checks out.
     """
 
     year: int
     week: int
 
+    def __post_init__(self) -> None:
+        """Checks the fields.
+
+        Raises:
+            TypeError: ``year`` or ``week`` is not an ``int``, or it is a ``bool``.
+            ValueError: ``year`` and ``week`` do not name a week.
+        """
+        for value in (self.year, self.week):
+            if isinstance(value, bool) or not isinstance(value, int):
+                raise TypeError("year and week must be int")
+        monday = date.fromisocalendar(self.year, self.week, 1)
+        if monday.toordinal() + _DAYS_IN_WEEK - 1 > date.max.toordinal():
+            raise ValueError("the week ends after 31 December 9999")
+
     @classmethod
     def of(cls, day: date) -> IsoWeek:
         """Gives the week that holds a date, as ``day.isocalendar()`` gives its year and week.
-
-        The mock raises ``NotImplementedError``.
 
         Args:
             day: A date. Not from 27 to 31 December 9999, which fall in ``9999-W52``.
@@ -50,15 +70,13 @@ class IsoWeek:
 
         Raises:
             ValueError: ``day`` is from 27 to 31 December 9999.
-            NotImplementedError: Always, in the mock.
         """
-        raise NotImplementedError
+        year, week, _ = day.isocalendar()
+        return cls(year, week)
 
     @classmethod
     def parse(cls, text: str) -> IsoWeek | None:
         """Reads the written form of a week, in a file name, the key ``week``, or an argument.
-
-        The mock raises ``NotImplementedError``.
 
         Args:
             text: A text to read, such as a file name without ``.toml``. Any string.
@@ -66,85 +84,73 @@ class IsoWeek:
         Returns:
             The week whose ``str`` equals ``text``, or ``None`` when there is no such week. So
             ``text`` is four ASCII digits, ``-W``, and two ASCII digits, with nothing before or
-            after them, and it names a week by the constraints of the fields. The implementation
-            never raises for a ``str``.
-
-        Raises:
-            NotImplementedError: Always, in the mock.
+            after them, and it names a week by the constraints of the fields. It never raises
+            for a ``str``.
         """
-        raise NotImplementedError
+        if not _WEEK_FORM.fullmatch(text):
+            return None
+        try:
+            return cls(int(text[:4]), int(text[6:]))
+        except ValueError:
+            return None
 
     @property
     def dates(self) -> tuple[date, ...]:
         """Gives the seven dates of the week.
 
-        The mock raises ``NotImplementedError``.
-
         Returns:
             The dates from Monday to Sunday, in the order of ``Day``.
-
-        Raises:
-            NotImplementedError: Always, in the mock.
         """
-        raise NotImplementedError
+        monday = date.fromisocalendar(self.year, self.week, 1)
+        return tuple(monday + timedelta(days=offset) for offset in range(_DAYS_IN_WEEK))
 
     @property
     def date_range(self) -> BiText:
         """Writes the week's Monday and Sunday as one text in both languages.
-
-        The mock raises ``NotImplementedError``.
 
         Returns:
             A ``BiText`` with both languages set. The template depends on the first of these
             cases that applies: Monday and Sunday are in one month, in two months of one year,
             or in two years. A day and a year are numbers with no leading zero. A month is its
             name in English and its number in Chinese. So ``2026-W47`` gives
-            ``16 to 22 November 2026`` in English. The implementation never raises.
-
-        Raises:
-            NotImplementedError: Always, in the mock.
+            ``16 to 22 November 2026`` in English. It never raises.
         """
-        raise NotImplementedError
+        first, last = self.dates[0], self.dates[-1]
+        first_month = MONTH_NAMES[first.month - 1].to_bitext()
+        last_month = MONTH_NAMES[last.month - 1].to_bitext()
+        if first.year != last.year:
+            return RANGE_TWO_YEARS.to_bitext(
+                first=first.day,
+                first_month=first_month,
+                first_year=first.year,
+                last=last.day,
+                last_month=last_month,
+                last_year=last.year,
+            )
+        if first.month != last.month:
+            return RANGE_TWO_MONTHS.to_bitext(
+                first=first.day,
+                first_month=first_month,
+                last=last.day,
+                last_month=last_month,
+                year=first.year,
+            )
+        return RANGE_ONE_MONTH.to_bitext(
+            first=first.day, last=last.day, month=first_month, year=first.year
+        )
 
     def __str__(self) -> str:
         """Writes the week as the ISO year in four digits, ``-W``, and the week in two digits.
 
-        The mock raises ``NotImplementedError``.
-
         Returns:
             The text, such as ``2026-W47``, ``2027-W01``, or ``0001-W01``. A file name, the key
             ``week``, and every message write a week this way.
-
-        Raises:
-            NotImplementedError: Always, in the mock.
         """
-        raise NotImplementedError
-
-
-def short_date(day: date) -> BiText:
-    """Writes the date of one day as a short text in both languages.
-
-    The mock raises ``NotImplementedError``.
-
-    Args:
-        day: The date to write.
-
-    Returns:
-        A ``BiText`` with both languages set. The English text is the short name of the weekday,
-        the day, and the short name of the month, such as ``Mon 16 Nov``. The Chinese text is
-        the day's label, the month number, and the day number, with the characters for month and
-        day after their numbers. The implementation never raises.
-
-    Raises:
-        NotImplementedError: Always, in the mock.
-    """
-    raise NotImplementedError
+        return f"{self.year:04d}-W{self.week:02d}"
 
 
 def week_from_argument(text: str | None, today: date) -> IsoWeek | None:
     """Turns the argument ``WEEK`` of a command into an ISO week.
-
-    The mock raises ``NotImplementedError``.
 
     Args:
         text: The value of the argument as you typed it, or ``None`` when the command line
@@ -161,6 +167,9 @@ def week_from_argument(text: str | None, today: date) -> IsoWeek | None:
     Raises:
         ValueError: ``IsoWeek.of`` gets a date from 27 to 31 December 9999.
         OverflowError: ``text`` is ``next``, and ``today`` is on or after 25 December 9999.
-        NotImplementedError: Always, in the mock.
     """
-    raise NotImplementedError
+    if text is None or text == "this":
+        return IsoWeek.of(today)
+    if text == "next":
+        return IsoWeek.of(today + timedelta(days=_DAYS_IN_WEEK))
+    return IsoWeek.parse(text)

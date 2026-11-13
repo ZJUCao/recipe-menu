@@ -1,16 +1,30 @@
 """Listing the menu files of a data folder, and reading one week's file."""
 
-from recipe_menu.datafile import DataFolder, Problem
-from recipe_menu.menus._model import WeekMenu
+from collections.abc import Mapping
+
+from recipe_menu.datafile import (
+    MISSING_KEY,
+    DataFolder,
+    Problem,
+    Report,
+    list_toml_files,
+    read_text,
+    read_toml,
+    report_unknown_keys,
+)
+from recipe_menu.menus._model import Day, Dish, MealSlot, WeekMenu
+from recipe_menu.menus._read_parts import DayReader
 from recipe_menu.menus._week import IsoWeek
-from recipe_menu.settings import Settings
+from recipe_menu.menus.messages import NOT_A_WEEK_NAME, WEEK, WEEK_NOT_FILE_NAME, WEEK_NOT_ISO
+from recipe_menu.settings import Meal, Settings
+
+_TOP_KEYS = ("week", *(day.value for day in Day))
 
 
 def list_menu_weeks(folder: DataFolder) -> tuple[tuple[IsoWeek, ...], tuple[Problem, ...]]:
     """Lists the weeks that have a menu file in ``menus/``, from the file names.
 
-    It lists ``menus/`` through ``list_toml_files``, reads no file, and writes nothing. The
-    mock raises ``NotImplementedError``.
+    It lists ``menus/`` through ``list_toml_files``, reads no file, and writes nothing.
 
     Args:
         folder: The data folder.
@@ -35,12 +49,64 @@ def list_menu_weeks(folder: DataFolder) -> tuple[tuple[IsoWeek, ...], tuple[Prob
         When ``menus/`` is missing, is a file, or cannot be read, ``weeks`` is empty and
         ``problems`` holds only the one problem of ``list_toml_files``, with the file ``menus``.
 
-        The implementation never raises for bad data.
-
-    Raises:
-        NotImplementedError: Always, in the mock.
+        It never raises for bad data.
     """
-    raise NotImplementedError
+    names, listing_problems = list_toml_files(folder, folder.menus)
+    weeks: list[IsoWeek] = []
+    problems = list(listing_problems)
+    for name in names:
+        week = IsoWeek.parse(name)
+        if week is not None:
+            weeks.append(week)
+        else:
+            file = folder.relative(folder.menus) / f"{name}.toml"
+            problems.append(Problem.error(file, None, NOT_A_WEEK_NAME))
+    return tuple(weeks), tuple(problems)
+
+
+def _read_week_key(table: Mapping[str, object], week: IsoWeek, report: Report) -> None:
+    """Checks the key ``week`` of a menu file against the file's name.
+
+    Args:
+        table: The table of the file.
+        week: The week of the file's name.
+        report: Where the problems go.
+    """
+    place = WEEK.to_bitext()
+    if "week" not in table:
+        report.add(None, MISSING_KEY, key="week")
+        return
+    text = read_text(table, "week", place, report)
+    if text is None:
+        return
+    written = IsoWeek.parse(text)
+    if written is None:
+        report.add(place, WEEK_NOT_ISO, week=text)
+    elif written != week:
+        report.add(place, WEEK_NOT_FILE_NAME, name=str(week), week=text)
+
+
+def _build_menu(
+    week: IsoWeek,
+    settings: Settings,
+    found: Mapping[Day, Mapping[Meal, tuple[Dish, ...]]],
+) -> WeekMenu:
+    """Builds the menu from the dishes that the days gave.
+
+    Args:
+        week: The week.
+        settings: The settings.
+        found: The dishes of each meal of each day that the file names.
+
+    Returns:
+        The menu, with one slot for each day and each meal of the settings.
+    """
+    slots = tuple(
+        MealSlot(day, meal, found.get(day, {}).get(meal, ()))
+        for day in Day
+        for meal in settings.meals
+    )
+    return WeekMenu(week, settings.meals, slots)
 
 
 def read_week_menu(
@@ -56,7 +122,7 @@ def read_week_menu(
     problem. Every problem is an error. A problem has its place when it has one: the key, the
     day, the meal, or the dish of the mistake. A missing ``week`` and an unknown top-level key
     have no place, a read error of ``read_toml`` has ``line N`` or none, and ``UNKNOWN_RECIPE``
-    sits at the meal of the day. The mock raises ``NotImplementedError``.
+    sits at the meal of the day.
 
     Args:
         folder: The data folder.
@@ -64,9 +130,12 @@ def read_week_menu(
         settings: The meals of each day and the servings of a dish that gives none, or ``None``
             when the settings could not be read. Then only the checks that do not depend on
             the settings are made, and every meal of ``Meal`` is accepted. With ``None``, a day
-            key that names no meal gets ``UNKNOWN_KEY``. A meal that the settings do not name,
-            written as ``breakfast = []``, gives no problem and is not in the menu.
-        recipe_ids: The recipe IDs that a dish may name, as ``list_recipe_ids`` gave them.
+            key that names no meal gets ``UNKNOWN_KEY``. When ``settings`` is given, a meal
+            that it does not name, written as ``breakfast = []``, gives no problem and is not
+            in the menu.
+        recipe_ids: The recipe IDs that a dish may name, as ``list_recipe_ids`` gave them. A
+            dish whose ID breaks the rule of ``is_recipe_id`` gets ``UNKNOWN_RECIPE`` whatever
+            the set holds.
 
     Returns:
         A pair ``(menu, problems)``. ``menu`` is ``None`` when ``settings`` is ``None``, or
@@ -81,9 +150,18 @@ def read_week_menu(
         to Sunday, each with its keys in the file's order, then the other keys of the top of
         the file, in the file's order.
 
-        The implementation never raises for bad data.
-
-    Raises:
-        NotImplementedError: Always, in the mock.
+        It never raises for bad data.
     """
-    raise NotImplementedError
+    path = folder.menu_file(str(week))
+    table = read_toml(folder, path)
+    if isinstance(table, Problem):
+        return None, (table,)
+    report = Report(folder.relative(path))
+    _read_week_key(table, week, report)
+    reader = DayReader(settings, recipe_ids, report)
+    found = {day: reader.read_day(day, table[day.value]) for day in Day if day.value in table}
+    report_unknown_keys(table, _TOP_KEYS, None, report)
+    problems = tuple(report.problems)
+    if problems or settings is None:
+        return None, problems
+    return _build_menu(week, settings, found), problems

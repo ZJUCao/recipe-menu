@@ -1,8 +1,9 @@
 """Week menus: ISO weeks, days, dates, and the menu files with their problems."""
 
+from recipe_menu.menus._dates import short_date
 from recipe_menu.menus._model import Day, Dish, MealSlot, WeekMenu
 from recipe_menu.menus._read import list_menu_weeks, read_week_menu
-from recipe_menu.menus._week import IsoWeek, short_date, week_from_argument
+from recipe_menu.menus._week import IsoWeek, week_from_argument
 from recipe_menu.menus.messages import NOT_A_WEEK
 
 __all__ = [
