@@ -1,6 +1,7 @@
 """Reading the tags and the ingredient lines of a recipe file."""
 
 from collections.abc import Mapping
+from typing import Final
 
 from recipe_menu.catalog import Catalog, Ingredient, Tag
 from recipe_menu.datafile import (
@@ -30,6 +31,8 @@ from recipe_menu.recipes.messages import (
 )
 from recipe_menu.units import Quantity, WrongQuantity, WrongQuantityReason, parse_quantity
 
+_TAGS_PLACE: Final[BiText] = TAGS.to_bitext()
+_INGREDIENTS_PLACE: Final[BiText] = INGREDIENTS.to_bitext()
 _NOTE_GAPS = Gaps(None, NO_ZH_NOTE, NO_EN_NOTE)
 _LINE_KEYS = ("item", "amount", "note")
 _AMOUNT_MESSAGES = {
@@ -53,10 +56,10 @@ def read_tags(
     Returns:
         The tags that the items name, each once, in the order of the first item that names it.
     """
-    place = TAGS.to_bitext()
+    place = _TAGS_PLACE
     tags: list[Tag] = []
     for number, item in enumerate(read_list(table, "tags", place, report), 1):
-        text = read_item_text(item, TAG_N.to_bitext(number=number), report)
+        text = read_item_text(item, TAG_N, number, report)
         if text is None or catalog is None:
             continue
         tag = catalog.find_tag(text)
@@ -211,6 +214,6 @@ def read_ingredients(
     Returns:
         The lines in the file's order, without the lines that have a problem.
     """
-    items = read_list(table, "ingredients", INGREDIENTS.to_bitext(), report)
+    items = read_list(table, "ingredients", _INGREDIENTS_PLACE, report)
     lines = [_read_line(item, number, catalog, report) for number, item in enumerate(items, 1)]
     return tuple(line for line in lines if line is not None)

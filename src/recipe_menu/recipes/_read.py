@@ -1,6 +1,7 @@
 """Reading recipe files into recipes."""
 
 from collections.abc import Mapping
+from typing import Final
 
 from recipe_menu.catalog import Catalog
 from recipe_menu.datafile import (
@@ -13,12 +14,14 @@ from recipe_menu.datafile import (
     read_toml,
     report_unknown_keys,
 )
+from recipe_menu.lang import BiText
 from recipe_menu.recipes._ids import is_recipe_id, list_recipe_ids
 from recipe_menu.recipes._model import Recipe
 from recipe_menu.recipes._read_lines import read_ingredients, read_tags
 from recipe_menu.recipes._read_steps import read_name, read_steps
 from recipe_menu.recipes.messages import SERVINGS
 
+_SERVINGS_PLACE: Final[BiText] = SERVINGS.to_bitext()
 _KEYS = ("name", "servings", "tags", "ingredients", "steps")
 
 
@@ -35,7 +38,7 @@ def _read_servings(table: Mapping[str, object], report: Report) -> int | None:
     if "servings" not in table:
         report.add(None, MISSING_KEY, key="servings")
         return None
-    return read_servings(table["servings"], SERVINGS.to_bitext(), report)
+    return read_servings(table["servings"], _SERVINGS_PLACE, report)
 
 
 def read_recipe(

@@ -1,7 +1,4 @@
-"""The ``check`` command: reads every data file and reports its errors and warnings.
-
-The mock gives a command whose ``run`` raises ``NotImplementedError``.
-"""
+"""The ``check`` command: reads every data file and reports its errors and warnings."""
 
 from typing import Final
 
