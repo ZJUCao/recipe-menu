@@ -1,8 +1,9 @@
 """The messages of ``datafile``: the places in a file, the read errors, and the shape of a file.
 
 Only the eight messages for the shape of a file are exported by ``recipe_menu.datafile``. The
-others, the read errors, the folder listing, and the servings, are internal to the module, for
-``read_toml``, ``list_toml_files``, and ``read_servings``.
+others, the read errors, the folder listing, the servings, and the creation errors, are internal
+to the module, for ``read_toml``, ``list_toml_files``, ``read_servings``, and
+``create_data_folder``.
 """
 
 from typing import Final
@@ -155,4 +156,25 @@ SERVINGS_TOO_FEW: Final[Message] = Message(
 SERVINGS_TOO_MANY: Final[Message] = Message(
     "Servings must be a whole number of 100 or less, not {servings}.",
     "份数必须是不大于 100 的整数，不能是 {servings}。",
+)
+
+# Why a folder or a file cannot be created, from ``create_data_folder``. These are internal to
+# ``datafile``.
+FILE_EXISTS: Final[Message] = Message("The file already exists.", "文件已存在。")
+FILE_WRITE_DENIED: Final[Message] = Message(
+    "The file cannot be written: access is denied.",
+    "无法写入文件：没有访问权限。",
+)
+FILE_WRITE_ERROR: Final[Message] = Message(
+    "The file cannot be written. The system says: {reason}",
+    "无法写入文件。系统提示：{reason}",
+)
+FOLDER_EXISTS: Final[Message] = Message("The folder already exists.", "文件夹已存在。")
+FOLDER_CREATE_DENIED: Final[Message] = Message(
+    "The folder cannot be created: access is denied.",
+    "无法创建文件夹：没有访问权限。",
+)
+FOLDER_CREATE_ERROR: Final[Message] = Message(
+    "The folder cannot be created. The system says: {reason}",
+    "无法创建文件夹。系统提示：{reason}",
 )

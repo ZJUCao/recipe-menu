@@ -1,5 +1,6 @@
 """The data folder, TOML files, and the problems that data files cause."""
 
+from recipe_menu.datafile._creation import Creation, CreationOutcome, create_data_folder
 from recipe_menu.datafile._folder import DataFolder
 from recipe_menu.datafile._listing import list_toml_files
 from recipe_menu.datafile._problem import Problem, Severity
@@ -34,10 +35,13 @@ __all__ = [
     "NOT_A_TABLE",
     "NOT_A_TEXT",
     "UNKNOWN_KEY",
+    "Creation",
+    "CreationOutcome",
     "DataFolder",
     "Problem",
     "Report",
     "Severity",
+    "create_data_folder",
     "list_toml_files",
     "read_list",
     "read_servings",
