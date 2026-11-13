@@ -151,8 +151,10 @@ def report_unknown_keys(
         place: The place of the table, or ``None`` for the top of the file.
         report: Where the problems go.
     """
+    unknown = [key for key in table if key not in known]
+    if not unknown:
+        return
     message = UNKNOWN_KEY.pick(len(known))
     keys = and_list(known)
-    for key in table:
-        if key not in known:
-            report.add(place, message, key=key, keys=keys)
+    for key in unknown:
+        report.add(place, message, key=key, keys=keys)

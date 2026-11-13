@@ -1,11 +1,18 @@
 """Reading the name and the steps of a recipe file."""
 
 from collections.abc import Mapping
+from typing import Final
 
 from recipe_menu.datafile import MISSING_KEY, NOT_A_LIST, Report, report_unknown_keys
 from recipe_menu.lang import BiText
 from recipe_menu.recipes._model import Steps
-from recipe_menu.recipes._texts import Gaps, Side, read_bitext, read_item_text, report_gaps
+from recipe_menu.recipes._texts import (
+    Gaps,
+    Side,
+    read_bitext,
+    read_item_text,
+    report_gaps,
+)
 from recipe_menu.recipes.messages import (
     EN_STEP_N,
     NAME,
@@ -22,6 +29,8 @@ from recipe_menu.recipes.messages import (
 )
 from recipe_menu.text import Message
 
+_NAME_PLACE: Final[BiText] = NAME.to_bitext()
+_STEPS_PLACE: Final[BiText] = STEPS.to_bitext()
 _NAME_GAPS = Gaps(NO_NAME, NO_ZH_NAME, NO_EN_NAME)
 _STEPS_GAPS = Gaps(NO_STEPS, NO_ZH_STEPS, NO_EN_STEPS)
 
@@ -40,7 +49,7 @@ def read_name(table: Mapping[str, object], report: Report) -> BiText | None:
     if "name" not in table:
         report.add(None, MISSING_KEY, key="name")
         return None
-    place = NAME.to_bitext()
+    place = _NAME_PLACE
     value = table["name"]
     if not isinstance(value, dict):
         report.add(place, NOT_A_ZH_EN_TABLE, key="name")
@@ -70,11 +79,10 @@ def _read_steps_side(
         return Side((), True, False)
     value = table[key]
     if not isinstance(value, list):
-        report.add(STEPS.to_bitext(), NOT_A_LIST, key=key)
+        report.add(_STEPS_PLACE, NOT_A_LIST, key=key)
         return Side((), False, True)
     found = (
-        read_item_text(item, step_place.to_bitext(number=number), report)
-        for number, item in enumerate(value, 1)
+        read_item_text(item, step_place, number, report) for number, item in enumerate(value, 1)
     )
     return Side(tuple(text for text in found if text is not None), not value, False)
 
@@ -93,7 +101,7 @@ def read_steps(table: Mapping[str, object], report: Report) -> Steps | None:
     if "steps" not in table:
         report.add(None, MISSING_KEY, key="steps")
         return None
-    place = STEPS.to_bitext()
+    place = _STEPS_PLACE
     value = table["steps"]
     if not isinstance(value, dict):
         report.add(place, NOT_A_STEPS_TABLE)

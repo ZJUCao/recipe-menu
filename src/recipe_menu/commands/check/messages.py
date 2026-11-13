@@ -1,7 +1,8 @@
-"""The messages of ``check``: the help line, the count line, the headings, and the closing lines.
+"""The messages of ``check``: the help line, the count line, the headings, and the other lines.
 
-Every message is internal to the module. The report of ``recipe-menu check`` is made of them and
-of the problems that the readers of ``catalog``, ``recipes``, ``settings``, and ``menus`` give.
+The other lines are the lines for no errors and the closing line. Every message is internal to the
+module. The report of ``recipe-menu check`` is made of them and of the problems that the readers
+of ``catalog``, ``recipes``, ``settings``, and ``menus`` give.
 """
 
 from typing import Final

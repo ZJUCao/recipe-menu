@@ -44,12 +44,14 @@ class Gaps(NamedTuple):
     no_en: Message
 
 
-def read_item_text(item: object, place: BiText, report: Report) -> str | None:
+def read_item_text(item: object, message: Message, number: int, report: Report) -> str | None:
     """Reads an item of a list that must be a text.
 
     Args:
         item: The item, as the file gives it.
-        place: The place of the item.
+        message: The message of the place of the item, such as ``TAG_N``. The place is built only
+            when the item has a problem.
+        number: The number of the item, counted from 1.
         report: Where the problems go.
 
     Returns:
@@ -57,11 +59,11 @@ def read_item_text(item: object, place: BiText, report: Report) -> str | None:
         not a text or holds only whitespace.
     """
     if not isinstance(item, str):
-        report.add(place, ITEM_NOT_A_TEXT)
+        report.add(message.to_bitext(number=number), ITEM_NOT_A_TEXT)
         return None
     text = item.strip()
     if not text:
-        report.add(place, EMPTY_ITEM)
+        report.add(message.to_bitext(number=number), EMPTY_ITEM)
         return None
     return text
 
