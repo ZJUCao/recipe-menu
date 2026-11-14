@@ -1,9 +1,9 @@
 ---
 troy-doc: "architecture"
 lang: "en"
-version: "3.0"
-updated: "2026-11-13"
-status: "Approved by Troy on 2026-11-13"
+version: "4.0"
+updated: "2026-11-14"
+status: "Approved by Troy on 2026-11-14"
 mirror: "architecture.zh-CN.md"
 ---
 
@@ -205,7 +205,7 @@ The keys and shapes of every file are those of `docs/prototypes/example-data.md`
 - A warning, such as a missing language, never changes the exit code.
 - An `except` clause names the exceptions it catches, at the place that turns them into a `Problem`, a result, or a `UsageError`. No code catches `Exception` or uses a bare `except`.
 - The parser's English text never reaches the user alone. `datafile` turns the reasons it knows into messages, and shows a general message with the line for any other reason.
-- A problem names its file relative to the data folder, with the system's separator, such as `recipes\mapo-tofu.toml` on Windows. Other messages name a file or a folder by its full path. A failure of `init` is an exception to the first rule, because its data folder is one that you just asked it to create, not one that you use every day (ADR-0009). The first line of the failure names the folder or file that `init` could not create by its full path, `str(context.folder.root / problem.file)`. A failure at the data folder or at a folder above it has the file `Path(".")`, so that line names the data folder. The `Problem` still holds its file relative to the data folder (5.2). F11's `menu new` and F13's `shop` may also name a file that they could not write by its full path.
+- A problem names its file relative to the data folder, with the system's separator, such as `recipes\mapo-tofu.toml` on Windows. Other messages name a file or a folder by its full path. A failure of `init` is an exception to the first rule, because its data folder is one that you just asked it to create, not one that you use every day (ADR-0009). The first line of the failure names the folder or file that `init` could not create by its full path, `str(context.folder.root / problem.file)`. A failure at the data folder or at a folder above it has the file `Path(".")`, so that line names the data folder. The `Problem` still holds its file relative to the data folder (5.2). The first line of a failure of F11's `menu new` names the file that it could not write, or the folder `menus\` that it could not list, by its full path (ADR-0010). F13's `shop` may also name a file that it could not write by its full path.
 - A command's output goes to stdout. A message that ends a command with exit code 1 or 2 goes to stderr. The report of `check` is its output, so it goes to stdout with either exit code.
 - `datafile` opens a new file in exclusive mode, so `init` and `menu new` refuse and never overwrite. It writes a file that it replaces, such as a week's shopping list, to a temporary file in the same folder and then moves it over the old one.
 
@@ -260,7 +260,7 @@ The tool uses no third-party package at run time. The table lists what builds an
 
 ## 11. Decision records
 
-Troy accepted ADR-0001 to ADR-0007 on 2026-11-10 by approving this document, ADR-0008 on 2026-11-12 in the F05 design, and ADR-0009 on 2026-11-13 in the F08 design.
+Troy accepted ADR-0001 to ADR-0007 on 2026-11-10 by approving this document, ADR-0008 on 2026-11-12 in the F05 design, ADR-0009 on 2026-11-13 in the F08 design, and ADR-0010 on 2026-11-14 in the F11 design.
 
 | ADR | Title | Status |
 | --- | --- | --- |
@@ -273,6 +273,7 @@ Troy accepted ADR-0001 to ADR-0007 on 2026-11-10 by approving this document, ADR
 | ADR-0007 | Exact amounts with fractions | Accepted |
 | ADR-0008 | Usage hints, the data folder check, and the other exceptions of tomllib | Accepted |
 | ADR-0009 | A failure of init names its file by its full path | Accepted |
+| ADR-0010 | A failure of menu new names its file or folder by its full path | Accepted |
 
 ## 12. Change log
 
@@ -284,3 +285,5 @@ Troy accepted ADR-0001 to ADR-0007 on 2026-11-10 by approving this document, ADR
 | 2.0 | 2026-11-12 | Approved by Troy. |
 | 2.1 | 2026-11-13 | Records option 1 of open question D, which Troy decided in the F08 design on 2026-11-13 (ADR-0009). Section 6: the first line of a failure of `init` names the folder or file that `init` could not create by its full path, and names the data folder for a failure at the data folder or at a folder above it. The `Problem` still holds its file relative to the data folder, and every problem that a reader or a check reports keeps the relative path. F11's `menu new` and F13's `shop` may also name a file that they could not write by its full path. Section 11 lists ADR-0009. |
 | 3.0 | 2026-11-13 | Approved by Troy. |
+| 3.1 | 2026-11-14 | Records option 1 of point C, which Troy decided in the F11 design on 2026-11-14 (ADR-0010). Section 6: the first line of a failure of `menu new` names the file that it could not write, or the folder `menus\` that it could not list, by its full path. The `Problem` still holds its file relative to the data folder, and every problem that a reader or a check reports keeps the relative path, so `check` and `menu show` still name a missing `menus` folder as `menus`. F13's `shop` may still name only a file that it could not write by its full path. Section 11 lists ADR-0010. |
+| 4.0 | 2026-11-14 | Approved by Troy. |
