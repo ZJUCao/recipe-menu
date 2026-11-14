@@ -1,6 +1,6 @@
 """The messages of ``search``: the help line, the argument name, headings, places, and counts.
 
-Every message is internal to the module, with the empty-word error. The output of
+The module also holds the empty-word error. Every message is internal to the module. The output of
 ``recipe-menu search`` is made of them and of the problems that the readers of ``catalog`` and
 ``recipes`` give.
 """

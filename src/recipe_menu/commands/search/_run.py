@@ -1,14 +1,19 @@
 """The run function of the ``search`` command."""
 
-from recipe_menu.app import Arguments, Context
+from typing import cast
+
+from recipe_menu.app import Arguments, Context, UsageError, first_error, stop_at_error
+from recipe_menu.catalog import Catalog, read_catalog
+from recipe_menu.commands.search._match import has_empty_word, word_hits
+from recipe_menu.commands.search._output import search_output
+from recipe_menu.commands.search.messages import EMPTY_WORD
+from recipe_menu.recipes import read_recipes
 
 
 def run_search(context: Context, arguments: Arguments) -> int:
     """Finds the recipes that match every word and writes them as a table on ``context.out``.
 
-    The mock reads no file, writes nothing, raises nothing, and gives 0.
-
-    The implementation checks every word first, in order, with ``matching_form``, before it reads
+    It checks every word first, in order, with ``matching_form``, before it reads
     a file. Then it reads the catalog with ``read_catalog``, and then every recipe with
     ``read_recipes`` (no separate ``list_recipe_ids``). It stops at the first error of each
     reader with ``stop_at_error``, which gives exit code 1. The warnings are not written and
@@ -35,17 +40,31 @@ def run_search(context: Context, arguments: Arguments) -> int:
         empty line, and the count line. The rows come in the order of ``read_recipes``, after a
         heading row. A row holds ``recipe.id``, ``recipe.name.get(context.lang)``, and
         ``comma_list`` of the messages of the recipe's places, each place once, in the order
-        name, ingredient, tag, in ``context.lang``. The count line is ``RECIPES_MATCH`` for one
-        word and ``RECIPES_MATCH_ALL`` for two or more words, picked by the number of recipes. Its
-        ``words`` are the words as typed, in order, each word that equals an earlier word exactly
-        left out, each one through ``QUOTED_WORD`` and ``and_list``. ``RECIPES_MATCH`` or
+        name, ingredient, tag, in ``context.lang``. The count line is ``RECIPES_MATCH`` or
+        ``RECIPES_MATCH_ALL``, picked by the number of recipes. Its ``words`` are the words as
+        typed, in order, each word that equals an earlier word exactly left out, each one through
+        ``QUOTED_WORD`` and ``and_list``. ``RECIPES_MATCH`` or
         ``NO_RECIPE_MATCHES`` is for one word and the ``_ALL`` message for two or more, counted
         after the repeated words are left out. When no recipe matches, also for a ``recipes/``
         folder with no recipe file, the output is one line, ``NO_RECIPE_MATCHES`` or
         ``NO_RECIPE_MATCHES_ALL``, with no table, and the code is 0.
 
     Raises:
-        UsageError: The implementation raises it with ``EMPTY_WORD`` and no hint for the first
+        UsageError: ``run_search`` raises it with ``EMPTY_WORD`` and no hint for the first
             word whose matching form is empty, before it reads a file or writes any output.
     """
+    words = arguments.values
+    if has_empty_word(words):
+        raise UsageError(EMPTY_WORD, None)
+    catalog, problems = read_catalog(context.folder)
+    error = first_error(problems)
+    if error is not None:
+        return stop_at_error(context, error)
+    recipes, problems = read_recipes(context.folder, catalog)
+    error = first_error(problems)
+    if error is not None:
+        return stop_at_error(context, error)
+    # The catalog is None only after an error.
+    hits = word_hits(cast(Catalog, catalog), words)
+    context.out.write(search_output(context, recipes, hits, words))
     return 0
