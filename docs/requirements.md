@@ -1,8 +1,8 @@
 ---
 troy-doc: "requirements"
 lang: "en"
-version: "1.9"
-updated: "2026-11-13"
+version: "1.10"
+updated: "2026-11-14"
 status: "Approved by Troy on 2026-11-10"
 mirror: "requirements.zh-CN.md"
 ---
@@ -123,7 +123,7 @@ Each prototype is a PowerShell session in Windows Terminal that runs the same co
 | F07 | Check the data files | F05 | F03, F04, F06 | v0.1 | Passes tests on main |
 | F08 | Start a data folder | F05 | F03, F04, F07 | v0.1 | Passes tests on main |
 | F09 | List and show recipes | F05 | F01, F02, F04 | v0.1 | Passes tests on main |
-| F10 | Search recipes | F05 | F03, F04, F09 | v0.1 | Not started |
+| F10 | Search recipes | F05 | F03, F04, F09 | v0.1 | Passes tests on main |
 | F11 | Create and show a week menu | F05 | F02, F06 | v0.1 | Not started |
 | F12 | Build the shopping list | None | F01, F03, F04, F06 | v0.1 | Not started |
 | F13 | Shopping list command | F05 | F02, F12 | v0.1 | Not started |
@@ -280,3 +280,4 @@ Topological order: F01, F02, F03, F04, F05, F06, F07, F08, F09, F10, F11, F12, F
 | 1.7 | 2026-11-13 | F07 passes tests on main. |
 | 1.8 | 2026-11-13 | F08 passes tests on main. |
 | 1.9 | 2026-11-13 | F09 passes tests on main. |
+| 1.10 | 2026-11-14 | F10 passes tests on main. |
