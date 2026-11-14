@@ -3,9 +3,9 @@
 PT01 is the performance target of requirements 7.1: 1,000 recipes, 300 catalog ingredients, and
 52 week menus. ``make_pt01`` writes the folder with the shape that the v0.1 test plan gives
 v0.1-S27, and ``timed_runs`` times ``python -m recipe_menu check`` on it. ``command_run`` and
-``command_runs`` time any command, and ``pt01_list`` and ``pt01_show`` give the expected output
-of ``list`` and ``show recipe-0500`` on the folder. Nothing here calls an interface of a command
-when the module is imported.
+``command_runs`` time any command, and ``pt01_list``, ``pt01_show``, and ``pt01_search`` give the
+expected output of ``list``, ``show recipe-0500``, and a search on the folder. Nothing
+here calls an interface of a command when the module is imported.
 """
 
 import statistics
@@ -250,4 +250,18 @@ def pt01_show() -> Result:
         lines.append(
             f"  {n}. Step {n}: Wash and cut the ingredients, and stir-fry them for two minutes."
         )
+    return 0, lines_text(lines), ""
+
+
+def pt01_search() -> Result:
+    """Gives the result of the PT01 search on the folder: 1,003 lines, built from the rules.
+
+    Every recipe names the ingredient of the search in its first line and nowhere else, so each of
+    the 1,000 recipes matches in ``ingredient`` only. The ID column and the Name column are each 14
+    columns wide with their gap, because ``recipe-0001`` and ``Recipe 0001`` take 11 columns.
+    """
+    lines = [f"{'ID':<14}{'Name':<14}Matched in"]
+    for k in range(1, RECIPES + 1):
+        lines.append(f"recipe-{k:04d}   Recipe {k:04d}   ingredient")
+    lines += ["", f'{RECIPES} recipes match "食材001".']
     return 0, lines_text(lines), ""
