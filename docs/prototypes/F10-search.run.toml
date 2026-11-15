@@ -1,0 +1,13 @@
+# Run file of F10-search.md: how the real run sets up each section.
+# The prototype: "The data folder holds the example data in `example-data.md`." Every section
+# starts from it.
+
+[paths]
+'C:\Users\Troy' = '<home>'
+
+[environment]
+unset = ["RECIPE_MENU_DATA"]
+
+[start]
+copy = [{ from = "tests/data/example", to = '<home>\recipe-menu' }]
+mkdir = ['<home>\recipe-menu\shopping']

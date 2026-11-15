@@ -1,0 +1,35 @@
+# Run file of F05-command-line.md: how the real run sets up each section.
+# The prototype: "The data folder holds the example data in `example-data.md`."
+
+[paths]
+'C:\Users\Troy' = '<home>'
+'D:\OneDrive\recipe-menu' = '<scratch>\OneDrive\recipe-menu'
+
+[environment]
+unset = ["RECIPE_MENU_DATA"]
+
+[start]
+copy = [{ from = "tests/data/example", to = '<home>\recipe-menu' }]
+mkdir = ['<home>\recipe-menu\shopping']
+
+# "In v0.1 the help lists the v0.1 commands": the line of shop comes with F13.
+[sections."Help in English"]
+later = [{ feature = "F13", typed = "recipe-menu --help" }]
+
+[sections."Help in Chinese"]
+later = [{ feature = "F13", typed = "recipe-menu --help --lang zh" }]
+
+# "After you set `language = "zh"` in `settings.toml`".
+[sections."The language from the settings"]
+replace = [{ file = '<home>\recipe-menu\settings.toml', text = 'language = "en"', with = 'language = "zh"' }]
+
+# Another data folder, named with --data and then RECIPE_MENU_DATA.
+[sections."Another data folder"]
+start = { copy = [{ from = "tests/data/example", to = '<scratch>\OneDrive\recipe-menu' }] }
+
+[sections."No data folder yet"]
+start = "empty"
+
+# The settings name the meal "supper".
+[sections."A broken settings file"]
+replace = [{ file = '<home>\recipe-menu\settings.toml', text = '"dinner"]', with = '"supper"]' }]

@@ -1,0 +1,38 @@
+# Run file of F11-menu.md: how the real run sets up each section.
+# The prototype: "A PowerShell session in Windows Terminal on Tuesday 10 November 2026, so this
+# week is 2026-W46 and next week is 2026-W47. The data folder holds the example data in
+# `example-data.md`, except that `menus\` is empty at the start."
+
+[paths]
+'C:\Users\Troy' = '<home>'
+
+[environment]
+unset = ["RECIPE_MENU_DATA"]
+
+[start]
+copy = [{ from = "tests/data/example", to = '<home>\recipe-menu' }]
+mkdir = ['<home>\recipe-menu\shopping']
+
+# menus\ is empty at the start. The new file is compared with the section's toml block.
+[sections."Create next week's menu"]
+delete = ['<home>\recipe-menu\menus\2026-W47.toml']
+commands = [
+  { typed = "recipe-menu menu new next", run = "recipe-menu menu new 2026-W47", reason = "next is 2026-W47 on the prototype's date, Tuesday 10 November 2026" },
+  { typed = "recipe-menu menu new next --lang zh", run = "recipe-menu menu new 2026-W47 --lang zh", reason = "next is 2026-W47 on the prototype's date, Tuesday 10 November 2026" },
+]
+files = [{ path = '<home>\recipe-menu\menus\2026-W47.toml', block = 1 }]
+
+# "Troy fills the file as `menus\2026-W47.toml` in `example-data.md` shows": the example data.
+[sections."Show the week after you fill it"]
+commands = [
+  { typed = "recipe-menu menu show next", run = "recipe-menu menu show 2026-W47", reason = "next is 2026-W47 on the prototype's date, Tuesday 10 November 2026" },
+]
+
+[sections."A week without a menu"]
+
+# Monday dinner of 2026-W47 names "tomato-eggs".
+[sections."A menu with a mistake"]
+replace = [{ file = '<home>\recipe-menu\menus\2026-W47.toml', text = '["tomato-egg", "choy-sum"', with = '["tomato-eggs", "choy-sum"' }]
+commands = [
+  { typed = "recipe-menu menu show next", run = "recipe-menu menu show 2026-W47", reason = "next is 2026-W47 on the prototype's date, Tuesday 10 November 2026" },
+]
