@@ -3,9 +3,10 @@
 PT01 is the performance target of requirements 7.1: 1,000 recipes, 300 catalog ingredients, and
 52 week menus. ``make_pt01`` writes the folder with the shape that the v0.1 test plan gives
 v0.1-S27, and ``timed_runs`` times ``python -m recipe_menu check`` on it. ``command_run`` and
-``command_runs`` time any command, and ``pt01_list``, ``pt01_show``, and ``pt01_search`` give the
-expected output of ``list``, ``show recipe-0500``, and a search on the folder. Nothing
-here calls an interface of a command when the module is imported.
+``command_runs`` time any command, and ``pt01_list``, ``pt01_show``, ``pt01_search``, and
+``pt01_menu_show`` give the expected output of ``list``, ``show recipe-0500``, a search, and
+``menu show 2026-W26`` on the folder. Nothing here calls an interface of a command when the
+module is imported.
 """
 
 import statistics
@@ -264,4 +265,32 @@ def pt01_search() -> Result:
     for k in range(1, RECIPES + 1):
         lines.append(f"recipe-{k:04d}   Recipe {k:04d}   ingredient")
     lines += ["", f'{RECIPES} recipes match "食材001".']
+    return 0, lines_text(lines), ""
+
+
+def pt01_menu_show() -> Result:
+    """Gives the result of ``menu show 2026-W26`` on the PT01 folder: 26 lines.
+
+    The lines are built with f-strings from the rules of the generator, not with ``format_table``.
+    The Day column is 10 columns wide and the columns of breakfast and lunch are 14 columns wide,
+    each followed by 3 spaces. The cell of meal ``m`` on day ``d`` in line ``s`` is
+    ``Recipe NNNN`` with NNNN as ``576 + 9 * d + 3 * m + s`` and the servings 4 for the first dish
+    of a dinner and 2 for the others.
+    """
+    days = ("Mon 22 Jun", "Tue 23 Jun", "Wed 24 Jun", "Thu 25 Jun", "Fri 26 Jun", "Sat 27 Jun")
+    days += ("Sun 28 Jun",)
+    lines = [
+        "Menu for 2026-W26, 22 to 28 June 2026",
+        "",
+        f"{'Day':<10}   {'Breakfast':<14}   {'Lunch':<14}   Dinner",
+    ]
+    for d, day in enumerate(days):
+        for s in range(3):
+            cells = [
+                f"Recipe {576 + 9 * d + 3 * m + s:04d} \u00d7{4 if m == 2 and s == 0 else 2}"
+                for m in range(3)
+            ]
+            first = day if s == 0 else ""
+            lines.append(f"{first:<10}   {cells[0]:<14}   {cells[1]:<14}   {cells[2]}")
+    lines += ["", "21 meals, 63 dishes. \u00d7n: servings."]
     return 0, lines_text(lines), ""
