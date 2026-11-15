@@ -1,8 +1,8 @@
 ---
 troy-doc: "rules"
 lang: "zh-CN"
-version: "1.0"
-updated: "2026-11-09"
+version: "1.1"
+updated: "2026-11-15"
 status: "由 troy-init 根据 troy-mode 初始化。"
 mirror-of: "rules.md"
 ---
@@ -41,9 +41,11 @@ mirror-of: "rules.md"
 | R19 | commit 使用 Troy 全局 CLAUDE.md 里规定的邮箱。commit 信息、PR 标题和 PR 描述不带任何 Claude 署名，也完全不提 Claude 或 Anthropic，除非 `.troy-mode/config.toml` 把署名检查模式设为 `trailers`。 | 硬 | Hook 和 CI | troy-mode | 2026-11-09 |
 | R20 | 合并的文档和 PR 描述里没有模板标记或填写说明。 | 硬 | CI | troy-mode | 2026-11-09 |
 | R21 | 每个改动都通过从单独分支发起的 PR 进入 `main`。永远不要在 `main` 上提交、推送 `main`，或从 `main` 开 PR。 | 硬 | Hook 和 CI | troy-mode | 2026-11-09 |
+| R22 | 每个接口设计、测试计划、需求和架构 PR 的描述都以给 Troy 的摘要开头，先中文后英文：对 Troy 有什么变化、需要 Troy 决定的每一件事及推荐，以及风险。每种语言最多 2,000 个字符（`.troy-mode/config.toml` 里的 `[summary] max_chars`），不含内部编号。 | 硬 | CI | troy-mode | 2026-11-15 |
 
 ## 3. 修改记录
 
 | 版本 | 日期 | 修改 |
 | --- | --- | --- |
 | 1.0 | 2026-11-09 | 初始化，包含来自 troy-mode 的 R01 到 R21。 |
+| 1.1 | 2026-11-15 | troy-mode 的规则更新到 troy-pstack 0.5.0。 |
