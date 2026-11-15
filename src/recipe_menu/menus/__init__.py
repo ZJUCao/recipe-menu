@@ -4,10 +4,11 @@ from recipe_menu.menus._dates import short_date
 from recipe_menu.menus._model import Day, Dish, MealSlot, WeekMenu
 from recipe_menu.menus._read import list_menu_weeks, read_week_menu
 from recipe_menu.menus._week import IsoWeek, week_from_argument
-from recipe_menu.menus.messages import NOT_A_WEEK
+from recipe_menu.menus.messages import NO_MENU, NOT_A_WEEK
 
 __all__ = [
     "NOT_A_WEEK",
+    "NO_MENU",
     "Day",
     "Dish",
     "IsoWeek",
