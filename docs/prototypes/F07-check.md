@@ -54,6 +54,10 @@ Checked the settings, the catalog, the pantry, 7 recipes, and 1 week menu.
   pantry.toml, line 2
     The file cannot be read: a closing "]" is missing.
 
+1 warning:
+  recipes\red-braised-pork.toml, steps
+    No English steps. Commands show the Chinese steps instead.
+
 Fix the errors and run "recipe-menu check" again.
 PS> $LASTEXITCODE
 1

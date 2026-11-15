@@ -1,0 +1,20 @@
+# Run file of F08-init.md: how the real run sets up each section.
+# The prototype: "A PowerShell session in Windows Terminal, before any data folder exists."
+
+[paths]
+'C:\Users\Troy' = '<home>'
+'D:\OneDrive\recipe-menu' = '<scratch>\OneDrive\recipe-menu'
+
+[environment]
+unset = ["RECIPE_MENU_DATA"]
+
+[sections."In English"]
+start = "empty"
+
+[sections."In Chinese"]
+start = "empty"
+
+# The English folder that "In English" creates already holds files, so init refuses it in English;
+# D:\OneDrive\recipe-menu does not exist.
+[sections."The folder already holds files"]
+start = { setup = ["recipe-menu init"] }

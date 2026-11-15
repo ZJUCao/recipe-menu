@@ -1,0 +1,31 @@
+# Run file of F07-check.md: how the real run sets up each section.
+# The prototype: "The data folder holds the example data in `example-data.md`, with two
+# mistakes: ingredient 3 of `mapo-tofu` says 豆瓣酱 in place of the catalog name 郫县豆瓣酱, and
+# Monday dinner of `2026-W47` says `tomato-eggs`."
+
+[paths]
+'C:\Users\Troy' = '<home>'
+
+[environment]
+unset = ["RECIPE_MENU_DATA"]
+
+[start]
+copy = [{ from = "tests/data/example", to = '<home>\recipe-menu' }]
+mkdir = ['<home>\recipe-menu\shopping']
+
+[sections."Errors and a warning, in English"]
+replace = [
+  { file = '<home>\recipe-menu\recipes\mapo-tofu.toml', text = "郫县豆瓣酱", with = "豆瓣酱" },
+  { file = '<home>\recipe-menu\menus\2026-W47.toml', text = '["tomato-egg", "choy-sum"', with = '["tomato-eggs", "choy-sum"' },
+]
+
+[sections."The same check in Chinese"]
+start = "previous"
+
+# "A file that cannot be read gets its line number": a comma is missing between two items of the
+# pantry's list on line 2, the mistake of F03 design 2.3 and F07 design 2.2.
+[sections."A syntax mistake"]
+replace = [{ file = '<home>\recipe-menu\pantry.toml', text = '"盐", "糖"', with = '"盐" "糖"' }]
+
+# "After the fixes": the example data, with its warning only.
+[sections."After the fixes"]

@@ -1,0 +1,23 @@
+# Run file of F13-shop.md: how the real run sets up each section.
+# The prototype: "F12 builds the list, and F13 prints and saves it. ... The data folder holds the
+# example data in `example-data.md`, including `menus\2026-W47.toml`." Every command runs
+# `recipe-menu shop`, which comes with F13.
+
+[paths]
+'C:\Users\Troy' = '<home>'
+
+[environment]
+unset = ["RECIPE_MENU_DATA"]
+
+[start]
+copy = [{ from = "tests/data/example", to = '<home>\recipe-menu' }]
+mkdir = ['<home>\recipe-menu\shopping']
+
+[sections."In English"]
+later = [{ feature = "F13" }]
+
+[sections."In Chinese"]
+later = [{ feature = "F13" }]
+
+[sections."No menu, or an empty menu"]
+later = [{ feature = "F13" }]
