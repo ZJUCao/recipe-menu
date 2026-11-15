@@ -3,6 +3,7 @@
 from recipe_menu.datafile._creation import Creation, CreationOutcome, create_data_folder
 from recipe_menu.datafile._folder import DataFolder
 from recipe_menu.datafile._listing import list_toml_files
+from recipe_menu.datafile._new_file import FileCreation, FileOutcome, create_file
 from recipe_menu.datafile._problem import Problem, Severity
 from recipe_menu.datafile._servings import MAX_SERVINGS, MIN_SERVINGS, read_servings
 from recipe_menu.datafile._shape import (
@@ -38,10 +39,13 @@ __all__ = [
     "Creation",
     "CreationOutcome",
     "DataFolder",
+    "FileCreation",
+    "FileOutcome",
     "Problem",
     "Report",
     "Severity",
     "create_data_folder",
+    "create_file",
     "list_toml_files",
     "read_list",
     "read_servings",

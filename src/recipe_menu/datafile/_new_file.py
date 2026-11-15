@@ -1,0 +1,125 @@
+r"""Creating one new file, never overwriting an entry."""
+
+from dataclasses import dataclass
+from enum import Enum
+from pathlib import Path
+
+from recipe_menu.datafile._folder import DataFolder
+from recipe_menu.datafile._problem import Problem
+
+
+class FileOutcome(Enum):
+    """What ``create_file`` found in the file's folder, or what stopped it.
+
+    ``CREATED`` means that the call created the file and wrote its text. ``EXISTS`` means that
+    an entry with the file's name, or with a name that differs from it only in the case of A to
+    Z, is in the file's folder. ``FAILED`` means that the listing of the folder failed or that an
+    ``OSError`` stopped the file. The call created nothing for ``EXISTS``, and it removed the
+    file for ``FAILED`` when it had created it.
+    """
+
+    CREATED = "created"
+    EXISTS = "exists"
+    FAILED = "failed"
+
+
+@dataclass(frozen=True, slots=True)
+class FileCreation:
+    """The result of ``create_file``.
+
+    Two values are equal when their four fields are equal, and a ``FileCreation`` is hashable.
+    The constructor checks its values, as Raises gives them.
+
+    What each outcome holds:
+
+    | Outcome | ``problem`` | ``left`` | ``existing`` |
+    | --- | --- | --- | --- |
+    | ``CREATED`` | ``None`` | Empty | ``None`` |
+    | ``EXISTS`` | ``None`` | Empty | The entry |
+    | ``FAILED`` | The error | The file when it could not be removed, else empty | ``None`` |
+
+    Attributes:
+        outcome: What happened.
+        problem: What stopped the call, as a problem. A ``Problem`` with ``Severity.ERROR`` for
+            ``FAILED``, and ``None`` for the other outcomes.
+        left: The file, as a full path, when the call created it and could not remove it after
+            the failure. Empty or one path for ``FAILED``, and empty for the other outcomes.
+        existing: The entry that is already there, as a full path. A ``Path`` for ``EXISTS``, and
+            ``None`` for the other outcomes.
+
+    Raises:
+        ValueError: ``outcome`` is ``FAILED`` and ``problem`` is ``None``, or ``outcome`` is
+            another member and ``problem`` is not ``None``. Or ``problem`` has
+            ``Severity.WARNING``. Or ``left`` holds more than one path, or it is not empty and
+            ``outcome`` is not ``FAILED``. Or ``outcome`` is ``EXISTS`` and ``existing`` is
+            ``None``, or ``outcome`` is another member and ``existing`` is not ``None``.
+
+    The mock leaves these checks out.
+    """
+
+    outcome: FileOutcome
+    problem: Problem | None = None
+    left: tuple[Path, ...] = ()
+    existing: Path | None = None
+
+
+def create_file(folder: DataFolder, path: Path, text: str) -> FileCreation:
+    r"""Creates one new file with its text, and never overwrites an entry.
+
+    The mock touches nothing and gives ``FileCreation(FileOutcome.CREATED)``.
+
+    The call works in these steps. First it checks ``path`` with ``folder.relative(path)`` and
+    encodes ``text`` as UTF-8, before it touches the disk. Then it lists ``path.parent`` with
+    ``Path.iterdir``. A listing that fails with an ``OSError`` gives ``FAILED`` with the file
+    ``folder.relative(path.parent)``, no place, and the message of the four listing problems of
+    ``list_toml_files``: ``FOLDER_IS_FILE``, ``FOLDER_MISSING``, ``FOLDER_ACCESS_DENIED``, or
+    ``FOLDER_SYSTEM_ERROR``. Then an entry whose name equals ``path.name``, when each ASCII
+    capital letter from A to Z in both names is changed to its small letter, gives ``EXISTS``
+    with ``existing`` set to ``path.parent`` joined with the entry's name. When several entries
+    match, the entry with exactly the name counts, and otherwise the first match in the order of
+    ``sorted``. An entry of any kind counts, and the call opens no entry. Last, it opens ``path``
+    in exclusive mode, ``"x"``, with ``encoding="utf-8"`` and ``newline="\n"``, writes the text
+    with one ``write`` call, also when the text is empty, and closes the file. So the file holds
+    the UTF-8 bytes of the text, with no byte order mark and with the line ends of the text.
+
+    The open, the write, and the close can raise an ``OSError``. The first row that applies
+    gives the result, with ``relative`` as ``folder.relative(path)`` and no place.
+    ``FileExistsError`` from the open gives ``EXISTS`` with ``existing=path``, as an entry
+    appeared after the listing. ``PermissionError`` gives ``FAILED`` with ``FILE_WRITE_DENIED``
+    at ``relative``. Any other ``OSError`` gives ``FAILED`` with ``FILE_WRITE_ERROR`` and
+    ``reason`` at ``relative``. The value ``reason`` is the error's ``strerror``, or the name of
+    the error's class when ``strerror`` is ``None`` or empty.
+
+    A file counts as created from the moment that its open succeeds. After an ``OSError`` from
+    the write or the close, the call removes the file with ``Path.unlink`` before it gives
+    ``FAILED``. A removal that fails with an ``OSError`` puts the full path of the file in
+    ``left``. Any other exception after the open, such as ``KeyboardInterrupt`` for Ctrl+C, runs
+    the same removal in a ``finally`` block and then goes on, so the call gives no result. No
+    ``except`` clause catches more than ``OSError``.
+
+    The call reaches the disk only through ``Path.iterdir``, ``os.scandir``, or ``os.listdir``
+    for the listing, ``Path.open`` or ``open`` in mode ``"x"``, one ``write`` on the file
+    object, and ``Path.unlink``. It never uses ``os.open``, ``Path.write_text``, ``Path.touch``,
+    ``os.replace``, or ``shutil``, because the fault harness of the tests replaces exactly the
+    calls above.
+
+    Args:
+        folder: The data folder.
+        path: The file to create, such as ``folder.menu_file("2026-W47")``. It is inside
+            ``folder.root`` and is not ``folder.root``.
+        text: The text of the file. UTF-8 can encode it.
+
+    Returns:
+        ``FileCreation(FileOutcome.CREATED)`` when the call created the file and wrote its
+        text. ``EXISTS`` with ``existing`` when the folder holds an entry of the file's name, as
+        the case rule above gives it, or when the exclusive open found one, with nothing
+        created. ``FAILED`` when the listing or an ``OSError`` stopped the call, with the
+        problem of the rules above and, in ``left``, the file when its removal failed.
+
+    Raises:
+        ValueError: ``path`` is not inside ``folder.root``, or it is ``folder.root``. The check
+            runs before the call touches the disk.
+        UnicodeEncodeError: ``text`` holds a character that UTF-8 cannot encode, such as a lone
+            surrogate. The check runs before the call touches the disk.
+    """
+    return FileCreation(FileOutcome.CREATED)

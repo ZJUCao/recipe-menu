@@ -1,7 +1,8 @@
 """The messages of ``menus``: dates, day names, places, and the problems of menu files.
 
-Only ``NOT_A_WEEK`` is exported from the package, for the commands. Every other message is
-internal to the module. The other problems of a menu file use the messages of ``datafile``.
+Only ``NOT_A_WEEK`` and ``NO_MENU`` are exported from the package, for the commands. Every other
+message is internal to the module. The other problems of a menu file use the messages of
+``datafile``.
 """
 
 from typing import Final
@@ -12,6 +13,12 @@ from recipe_menu.text import Message
 NOT_A_WEEK: Final[Message] = Message(
     '"{week}" is not a week. Write an ISO week such as 2026-W47, "this", or "next".',
     "“{week}”不是一个周。请写 2026-W47 这样的 ISO 周，或者写“this”或“next”。",
+)
+
+# The line for a week with no menu file, for ``menu show`` and for the commands that read a menu.
+NO_MENU: Final[Message] = Message(
+    'There is no menu for {week}. Run "recipe-menu menu new {week}" to create it.',
+    "{week} 没有菜单。运行“recipe-menu menu new {week}”创建它。",
 )
 
 # The name of a file in ``menus/`` that is not an ISO week.
