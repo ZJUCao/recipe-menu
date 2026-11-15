@@ -1,8 +1,8 @@
 ---
 troy-doc: "rules"
 lang: "en"
-version: "1.0"
-updated: "2026-11-09"
+version: "1.1"
+updated: "2026-11-15"
 status: "Seeded by troy-init from troy-mode."
 mirror: "rules.zh-CN.md"
 ---
@@ -41,9 +41,11 @@ mirror: "rules.zh-CN.md"
 | R19 | Commits use the email in Troy's global CLAUDE.md. Commit messages, PR titles, and PR descriptions carry no Claude attribution and do not mention Claude or Anthropic at all, unless `.troy-mode/config.toml` sets the attribution mode to `trailers`. | Hard | Hook and CI | troy-mode | 2026-11-09 |
 | R20 | A merged document or PR description holds no template markers or template guidance. | Hard | CI | troy-mode | 2026-11-09 |
 | R21 | Every change reaches `main` through a PR from its own branch. Never commit on `main`, push `main`, or open a PR from `main`. | Hard | Hook and CI | troy-mode | 2026-11-09 |
+| R22 | The description of every interface design, test plan, requirements, and architecture PR opens with a summary for Troy, in Chinese and then English: what changes for Troy, each point Troy decides with a recommendation, and the risks. Each language has at most 2,000 characters (`[summary] max_chars` in `.troy-mode/config.toml`) and holds no internal IDs. | Hard | CI | troy-mode | 2026-11-15 |
 
 ## 3. Change log
 
 | Version | Date | Change |
 | --- | --- | --- |
 | 1.0 | 2026-11-09 | Seeded with R01 to R21 from troy-mode. |
+| 1.1 | 2026-11-15 | troy-mode's rules brought up to troy-pstack 0.5.0. |
