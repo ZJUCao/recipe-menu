@@ -1,8 +1,8 @@
 ---
 troy-doc: "v0.1-test-plan"
 lang: "zh-CN"
-version: "0.2"
-updated: "2026-11-15"
+version: "0.3"
+updated: "2026-11-16"
 status: "草稿。"
 mirror-of: "test-plan.md"
 ---
@@ -19,7 +19,7 @@ mirror-of: "test-plan.md"
 
 这些场景沿用[需求 3](../../requirements.zh-CN.md#3-用户如何使用)的四个主要流程和 `docs/prototypes/` 里的原型。Claude 把场景作为 `version-tests/` 里的版本测试来运行。发布测试在 Troy 的电脑上运行这些版本测试，从不在 CI 里运行。Claude 的每个场景都这样运行：
 
-- 每个 `recipe-menu` 步骤都作为一个新进程运行：由运行测试的那个 Python 执行 `python -m recipe_menu`，带上该步骤的参数。进程的当前文件夹是一个空的临时文件夹。
+- 每个 `recipe-menu` 步骤都作为一个新进程运行：项目环境里的 `recipe-menu` 命令，与 Troy 输入的命令相同，带上该步骤的参数。测试在运行测试的那个 Python 所在环境的脚本文件夹里找到这个命令。进程的当前文件夹是一个空的临时文件夹。
 - 进程通过 `USERPROFILE` 得到一个临时的主文件夹 `<home>`。除非步骤设置了 `RECIPE_MENU_DATA`，进程里没有这个环境变量。所以没有场景会读取或修改 `C:\Users\Troy\recipe-menu`。
 - “示例文件夹”是 `tests/data/example/` 的一份新副本，放在 `<home>\recipe-menu`，带一个空的 `shopping\` 文件夹。`tests/data/example/` 存放 `docs/prototypes/example-data.md` 的数据。“init 文件夹”是 `recipe-menu init` 在 `<home>\recipe-menu` 创建的文件夹。每个场景步骤开头的“起始”写明它从哪个文件夹开始。
 - 测试按 UTF-8 读取 stdout 和 stderr，把 CRLF 和 LF 当作同一种换行符。
@@ -34,7 +34,7 @@ mirror-of: "test-plan.md"
 | v0.1-S03 | `init` 拒绝已有文件的文件夹。 | Claude | 起始：`<home>\recipe-menu` 里只有文件 `notes.txt`。1. 运行 `recipe-menu init`。2. 运行 `recipe-menu init --data <other>`，其中 `<other>` 是一个还不存在的临时文件夹。 | 步骤 1 打印 `<home>\recipe-menu already holds files. init changed nothing.`，退出码为 1。文件夹里仍然只有 `notes.txt`，字节和修改时间都不变。步骤 2 打印 F08“In English”一节的第一个输出，用 `<other>` 代替数据文件夹，退出码为 0。之后 `<other>` 里有 v0.1-S01 的文件和文件夹。 |
 | v0.1-S04 | 添加一个需要新食材的菜谱。 | Claude | 起始：init 文件夹。1. 添加 `recipes\cucumber-salad.toml`：名称为 拍黄瓜 和 Smashed cucumber，2 份，标签为 快手 和 素，食材为 黄瓜 `2 个` 和 大蒜 `2 瓣`，两种语言各一个步骤。2. 运行 `recipe-menu check`。3. 在目录的食材末尾加上 `{ zh = "黄瓜", en = "Cucumber", category = "produce" }`。4. 运行 `recipe-menu check`。5. 运行 `recipe-menu list`，再运行 `recipe-menu show cucumber-salad`。 | 步骤 2 报告 1 个错误，位置是 `recipes\cucumber-salad.toml, ingredient 1`，提示为 `Unknown ingredient "黄瓜". Add it to the catalog, or use its name in the catalog.`，退出码为 1。步骤 4 打印 `Checked the settings, the catalog, the pantry, 2 recipes, and 0 week menus.` 和 `No errors. No warnings.`，退出码为 0。在步骤 5 里，`list` 先列出 cucumber-salad，再列出 tomato-egg，最后一行是 `2 recipes.`。`show` 给出食材 Cucumber 2 pieces 和 Garlic 2 cloves。两个命令的退出码都是 0。 |
 | v0.1-S05 | 改正 `check` 报告的错误。 | Claude | 起始：示例文件夹，带 F07 原型里的两处错误：`mapo-tofu` 的食材 3 写成了 豆瓣酱，`2026-W47` 的周一晚餐写成了 `tomato-eggs`。1. 运行 `recipe-menu check`。2. 运行 `recipe-menu check --lang zh`。3. 把 豆瓣酱 改回 郫县豆瓣酱，把 `tomato-eggs` 改回 `tomato-egg`。4. 运行 `recipe-menu check`。 | 步骤 1 打印 F07“Errors and a warning, in English”一节的输出，退出码为 1。步骤 2 打印 F07“The same check in Chinese”一节的输出，退出码为 1。步骤 4 打印 F07“After the fixes”一节的输出，退出码为 0。 |
-| v0.1-S06 | 语法错误会写明行号。 | Claude | 起始：init 文件夹。1. 在 `pantry.toml` 的第 2 行，删掉 "盐" 和 "糖" 之间的逗号。2. 运行 `recipe-menu check`。 | 步骤 2 打印 F07“A syntax mistake”一节的输出，只是第一行为 `Checked the settings, the catalog, the pantry, 1 recipe, and 0 week menus.`。退出码为 1。 |
+| v0.1-S06 | 语法错误会写明行号。 | Claude | 起始：示例文件夹。1. 在 `pantry.toml` 的第 2 行，删掉 "盐" 和 "糖" 之间的逗号。2. 运行 `recipe-menu check`。 | 步骤 2 打印 F07“A syntax mistake”一节的输出，退出码为 1。 |
 | v0.1-S07 | 一次 `check` 列出所有问题。 | Claude | 起始：示例文件夹，带 9 处错误。在 `catalog.toml` 的食材末尾加两种食材：食材 23 为 `{ zh = "芥兰", en = "Broccoli", category = "produce" }`，食材 24 为 `{ zh = "香菜", en = "Coriander", category = "meats" }`。`pantry.toml` 的第 3 项为 "sesame oil"。`recipes\rice.toml` 的份数为 0，食材 1 的数量为 `1 cups`，标签为 `["breakfast"]`。`menus\2026-W47.toml` 的周写成 "2026-W48"，周五有 `supper = []`，周日晚餐第 1 道菜的份数为 0。1. 运行 `recipe-menu check`。 | 报告写着 `9 errors:`，列出 F07“Other problems that check reports”一节表格里的 9 个位置和提示，顺序不限，但有两处不同。重名在 `catalog.toml, ingredient 23`，提示为 `The English name "Broccoli" is also ingredient 3's name. Names must be unique.`。未知分类在 `catalog.toml, ingredient 24`。报告还列出 F07“After the fixes”一节里的警告。命令的退出码为 1。 |
 | v0.1-S08 | 带字节顺序标记和 CRLF 换行符的数据文件读起来一样。 | Claude | 起始：示例文件夹，每个文件都重新保存为带字节顺序标记的 UTF-8，换行符为 CRLF。1. 运行 `recipe-menu check`。2. 运行 `recipe-menu show tomato-egg`。3. 运行 `recipe-menu menu show 2026-W47`。4. 运行 `recipe-menu shop 2026-W47`。 | 四个步骤依次打印 F07“After the fixes”一节的输出、F09“Show one recipe”一节的输出、F11“Show the week after you fill it”一节的第一个输出，以及 F13“In English”一节的输出。每个步骤的退出码都是 0。`shopping\2026-W47.md` 为不带字节顺序标记的 UTF-8，换行符为 LF。 |
 | v0.1-S09 | 用两种语言列出菜谱。 | Claude | 起始：示例文件夹。1. 运行 `recipe-menu list`。2. 运行 `recipe-menu list --lang zh`。 | 步骤 1 和 2 打印 F09“List the recipes”一节的两个输出，退出码为 0。 |
@@ -126,3 +126,4 @@ PT01 是唯一的性能指标（[需求 7.1](../../requirements.zh-CN.md#71-性�
 | --- | --- | --- |
 | 0.1 | 2026-11-10 | 初稿。 |
 | 0.2 | 2026-11-15 | v0.1-S16 要求的英文常备行按目录的写法写出名称，即 `Cooking oil, Salt, Sugar`，因为 Troy 在 F13 设计里选了这样的一行。 |
+| 0.3 | 2026-11-16 | v0.1-S06 从示例文件夹开始，期望 F07“A syntax mistake”一节的输出保持原样，因为那一节现在也显示示例文件夹给出的警告。v0.1-S01 到 v0.1-S23 的步骤运行项目环境里的 `recipe-menu` 命令，而不是 `python -m recipe_menu`。 |
