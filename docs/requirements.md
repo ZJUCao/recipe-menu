@@ -1,9 +1,9 @@
 ---
 troy-doc: "requirements"
 lang: "en"
-version: "1.12"
+version: "2.0"
 updated: "2026-11-15"
-status: "Approved by Troy on 2026-11-10"
+status: "Approved by Troy on 2026-11-15"
 mirror: "requirements.zh-CN.md"
 ---
 
@@ -283,3 +283,5 @@ Topological order: F01, F02, F03, F04, F05, F06, F07, F08, F09, F10, F11, F12, F
 | 1.10 | 2026-11-14 | F10 passes tests on main. |
 | 1.11 | 2026-11-15 | F11 passes tests on main. |
 | 1.12 | 2026-11-15 | F12 passes tests on main. |
+| 1.13 | 2026-11-15 | The English pantry line of the F13 prototype writes the catalog's names as written, such as `Cooking oil`, as Troy decided in the F13 design. |
+| 2.0 | 2026-11-15 | Approved by Troy. |

@@ -49,7 +49,7 @@ Seasonings
 Other
   Cola            2 cans
 
-Not on the list, because they are in the pantry: cooking oil, salt, sugar, soy sauce, Sichuan pepper
+Not on the list, because they are in the pantry: Cooking oil, Salt, Sugar, Soy sauce, Sichuan pepper
 
 Saved C:\Users\Troy\recipe-menu\shopping\2026-W47.md
 ```
