@@ -1,8 +1,11 @@
 """Expected texts of the plan and shop flows (F11, F13), from the prototypes.
 
 Every text is a tuple of lines written out as literals, so no test reads a prototype file.
-`<data>` stands for the data folder (the folder recipe-menu in the home folder by default)
-and `<home>` for the home folder. `support.text` fills them in.
+`<data>` stands for the data folder (the folder recipe-menu in the home folder by default).
+The helper module ``support`` fills it in.
+
+At import the module holds only these tuples of text lines, and it imports nothing and calls
+nothing.
 """
 
 # F11 "Create next week's menu", output 1.

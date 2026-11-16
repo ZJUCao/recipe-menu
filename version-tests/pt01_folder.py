@@ -1,11 +1,16 @@
-"""The PT01 data folder of the v0.1 test plan, and the output that its commands must give.
+"""The large data folder of the v0.1 test plan (PT01), and the output that its commands must give.
 
-``make_pt01`` writes the folder of section 3 of the plan: 300 ingredients, 10 in the pantry,
-1,000 recipes of 12 ingredients each (all with one shared ingredient, the first in the catalog),
-and 52 week menus of 63 dishes from 63 different recipes. The ``pt01_*`` functions give the
-expected output of ``list``, ``show recipe-0500``, ``search`` for the shared ingredient, and
-``menu show 2026-W26`` on that folder, built from the rules of the generator. Nothing here
-imports ``recipe_menu``.
+The module serves three purposes. It writes the data folder of section 3 of the plan: 300
+ingredients, 10 of them in the pantry, 1,000 recipes of 12 ingredients each (all with one shared
+ingredient, the first in the catalog), and 52 week menus of 63 dishes from 63 different recipes.
+It gives the expected output of four of the commands that the PT01 cases run on that folder (the
+recipe list, one recipe, a search for the shared ingredient, and one week menu), built from the
+rules of the generator. It also holds the sizes of the folder and the expected report of
+``check`` on it.
+
+The module imports nothing of ``recipe_menu`` and runs no program. At import it only defines
+its constants and functions. It writes files only when its folder writer is called, and then only
+under the folder that the caller gives.
 """
 
 from pathlib import Path
