@@ -178,3 +178,10 @@ FOLDER_CREATE_ERROR: Final[Message] = Message(
     "The folder cannot be created. The system says: {reason}",
     "无法创建文件夹。系统提示：{reason}",
 )
+
+# Why a file cannot be replaced when its folder is not a folder, from ``replace_file``. It is
+# internal to ``datafile``. ``{folder}`` is the folder, relative to the data folder.
+PARENT_NOT_A_FOLDER: Final[Message] = Message(
+    'The file cannot be written: "{folder}" is not a folder.',
+    "无法写入文件：“{folder}”不是文件夹。",
+)

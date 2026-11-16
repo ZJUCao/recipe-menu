@@ -5,6 +5,7 @@ from recipe_menu.datafile._folder import DataFolder
 from recipe_menu.datafile._listing import list_toml_files
 from recipe_menu.datafile._new_file import FileCreation, FileOutcome, create_file
 from recipe_menu.datafile._problem import Problem, Severity
+from recipe_menu.datafile._replace import replace_file
 from recipe_menu.datafile._servings import MAX_SERVINGS, MIN_SERVINGS, read_servings
 from recipe_menu.datafile._shape import (
     Report,
@@ -52,5 +53,6 @@ __all__ = [
     "read_table",
     "read_text",
     "read_toml",
+    "replace_file",
     "report_unknown_keys",
 ]
