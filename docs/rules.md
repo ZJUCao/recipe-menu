@@ -1,9 +1,9 @@
 ---
 troy-doc: "rules"
 lang: "en"
-version: "1.1"
-updated: "2026-11-15"
-status: "Seeded by troy-init from troy-mode."
+version: "2.0"
+updated: "2026-11-16"
+status: "Approved by Troy on 2026-11-16"
 mirror: "rules.zh-CN.md"
 ---
 
@@ -42,6 +42,7 @@ mirror: "rules.zh-CN.md"
 | R20 | A merged document or PR description holds no template markers or template guidance. | Hard | CI | troy-mode | 2026-11-09 |
 | R21 | Every change reaches `main` through a PR from its own branch. Never commit on `main`, push `main`, or open a PR from `main`. | Hard | Hook and CI | troy-mode | 2026-11-09 |
 | R22 | The description of every interface design, test plan, requirements, and architecture PR opens with a summary for Troy, in Chinese and then English: what changes for Troy, each point Troy decides with a recommendation, and the risks. Each language has at most 2,000 characters (`[summary] max_chars` in `.troy-mode/config.toml`) and holds no internal IDs. | Hard | CI | troy-mode | 2026-11-15 |
+| P01 | The doc comment of a test support module, a helper module in `tests/` or `version-tests/` that holds no tests, says what the module is for and the limits it keeps, such as calling no interface at import. It names none of the functions, classes, or constants that it holds or imports, or that the tests take from other modules: each of those says what it does in its own doc comment. A limit may name the interface or value that the module keeps away from. A PR that changes a support module brings its doc comment in line. | Review | Test Manager and Code Reviewer | project | 2026-11-16 |
 
 ## 3. Change log
 
@@ -49,3 +50,4 @@ mirror: "rules.zh-CN.md"
 | --- | --- | --- |
 | 1.0 | 2026-11-09 | Seeded with R01 to R21 from troy-mode. |
 | 1.1 | 2026-11-15 | troy-mode's rules brought up to troy-pstack 0.5.0. |
+| 2.0 | 2026-11-16 | Added P01, which Troy picked in the v0.1.0 retrospective and approved on 2026-11-16. Existing code: fixed by cleanup PRs. |
