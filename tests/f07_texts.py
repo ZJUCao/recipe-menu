@@ -1,8 +1,10 @@
-"""The texts of F07 that the tests share: the places and the messages of the readers.
+"""The texts of F07 that the tests share, and the problems of the expected reports.
+
+The texts are the places and the messages of the readers.
 
 Each text is a pair of the English and the Chinese text, written out in full as a literal, so a
-test does not import a message of the code. A problem of an expected report is a ``Prob``.
-Nothing here calls an interface of ``check`` when the module is imported.
+test does not import a message of the code. Nothing here calls an interface of ``check`` when the
+module is imported.
 """
 
 from typing import NamedTuple
