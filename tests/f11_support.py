@@ -1,10 +1,10 @@
 """Helpers that the F11 tests share: calls on a date, the named changes, and the checks.
 
-Nothing here calls an interface of F11 when the module is imported. Functions call ``main``, make
-the folders of the cases, and check a ``FileCreation``. The expected texts are in ``f11_texts``.
-The module imports ``write`` of ``f03_support``, ``Result`` of ``f05_texts``, ``made`` of
-``f09_support``, ``LABELS`` of ``f11_texts``, and ``main`` and the types of the package. The F11
-tests import the other helpers that they use from their own modules.
+The module makes the data folders and the menu files of the cases, builds the bytes of a new menu
+file and the meals as the lines of a new menu name them, holds the sets of meals of the cases with
+their labels, and checks the outcome of a file creation. Nothing here calls an interface of F11
+when the module is imported. The other expected texts are in ``f11_texts``. The F11 tests import
+the other helpers that they use from their own modules.
 """
 
 import io

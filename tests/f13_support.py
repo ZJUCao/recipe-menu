@@ -1,12 +1,14 @@
 """Helpers that the F13 tests share: the fault harness, the builders, and the named changes.
 
-The module holds ``ShopFaults`` and ``shop_faults``, which add the rules ``move``, ``close``, and
-``unlink P: later`` to the harness of ``f08_support``, the links and the messages of the system,
-the builders ``shop_list``, ``shop_lines``, and ``shop_file``, which follow design 2.2 and use no
-code of F13, and the named changes of the test plan. Nothing here calls an interface of F13 when
-the module is imported: ``SHOP_COMMAND`` and ``replace_file`` are never called here, so the test
-files import against the mock and against a broken implementation. The expected texts are in
-``f13_texts`` and ``f13_blocks``.
+The module extends the fault harness of ``f08_support`` with the faults of a move, a close, and a
+later unlink, makes a folder link, finds the message of the system for a move onto a folder,
+builds the shopping list, its lines, and its file as design 2.2 says, with no code of F13, and
+holds the named changes, the expected call records, and the problems of the readers of the test
+plan. It also runs the command line inside the harness, holds a file open as another program does,
+makes the folders of a direct call, and copies the example folder in its starting state. Nothing
+here calls an interface of F13 when the module is imported, so the test files import against the
+mock and against a broken implementation. The other expected texts are in ``f13_texts`` and
+``f13_blocks``.
 """
 
 import builtins
