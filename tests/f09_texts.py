@@ -1,9 +1,9 @@
-"""The expected texts of F09: the outputs of ``list`` and ``show``, the helps, and the messages.
+"""The expected texts of F09, and the problems of the expected reports.
+
+The texts are the outputs of ``list`` and ``show``, the helps, and the messages.
 
 Every text is written out as a literal, so a test imports no message of ``browse`` and reads no
-prototype file. Nothing here calls an interface of F09 when the module is imported. A problem of
-the readers is a ``Prob`` of ``f07_texts``, and ``stop`` gives the three lines of
-``stop_at_error`` for it.
+prototype file. Nothing here calls an interface of F09 when the module is imported.
 """
 
 from collections.abc import Mapping, Sequence

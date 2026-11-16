@@ -1,13 +1,8 @@
 """Helpers that the F10 tests share: the searches of a case, the named changes, and the files.
 
-Nothing here calls an interface of F10 when the module is imported. ``searches`` and ``real_help``
-call ``main`` with the real commands through ``at``, ``raises_empty`` calls ``SEARCH_COMMAND.run``
-with a context from ``new_context``, ``span`` and ``lines_of`` pick lines of a block, and the named
-changes change the folders of a case. The expected texts are in ``f10_texts``. The module reuses
-``at`` and ``new_context`` of ``f09_support``, ``edit`` of ``f07_changes``, ``write`` and
-``put_bytes`` of ``f03_support``, and ``Result`` of ``f05_texts``. The F10 tests import
-``make_home``, ``make_init``, ``faults``, ``snapshot``, ``run_module``, and the other named
-changes from their own modules.
+The module runs the search or the help through the command line, or the search command alone,
+picks lines out of the expected blocks, and changes the folders of a case. Nothing here calls an
+interface of F10 when the module is imported. The expected texts are in ``f10_texts``.
 """
 
 from collections.abc import Iterable

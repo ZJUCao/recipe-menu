@@ -1,12 +1,8 @@
 """Helpers that the F09 tests share: calls, the named changes, and the extra recipes.
 
-Nothing here calls an interface of F09 when the module is imported. Functions call ``main`` or a
-command's ``run``, and change the folders of a case. The expected texts are in ``f09_texts``. The
-module reuses ``TODAY`` and ``copy_example`` of ``f05_support``, ``Result`` of ``f05_texts``,
-``call`` of ``f07_support``, ``edit``, ``mapo_mistake``, and ``servings_zero`` of ``f07_changes``,
-``Prob`` of ``f07_texts``, ``write`` of ``f03_support``, and ``pair`` of ``f09_texts``. The F09
-tests import ``make_home``, ``run_module``, ``snapshot``, ``make_init``, ``faults``, and the other
-named changes from their own modules.
+The module runs the command line or one command against the folders of a case, and changes those
+folders. Nothing here calls an interface of F09 when the module is imported. The expected texts
+are in ``f09_texts``.
 """
 
 import io

@@ -1,10 +1,8 @@
 """Helpers and expected reports that the F07 tests share.
 
-Nothing here calls an interface of ``check`` when the module is imported. At import the module
-holds only texts, numbers, and tuples of them. Functions call ``main`` and read the folders.
-
-``report`` writes the lines of the report of design 2.2 from the ``Prob`` values of
-``f07_texts``, and ``rep`` gives them as the result of a call.
+The module builds the expected report of design 2.2 and runs the command line against the
+folders of a case. Nothing here calls an interface of F07 when the module is imported. At import
+the module holds only texts and lists of texts.
 """
 
 import io
