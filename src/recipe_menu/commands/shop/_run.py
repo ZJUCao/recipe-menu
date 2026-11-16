@@ -1,12 +1,18 @@
 r"""The run function of the ``shop`` command."""
 
-from recipe_menu.app import Arguments, Context
+from typing import cast
+
+from recipe_menu.app import Arguments, Context, UsageError
+from recipe_menu.commands.shop._output import failure_output, file_text, list_output
+from recipe_menu.commands.shop._read import read_week_files
+from recipe_menu.commands.shop.messages import NO_DISHES
+from recipe_menu.datafile import FileOutcome, replace_file
+from recipe_menu.menus import NOT_A_WEEK, IsoWeek, week_from_argument
+from recipe_menu.shopping import build_shopping_list
 
 
 def run_shop(context: Context, arguments: Arguments) -> int:
     r"""Makes the shopping list of a week, saves it as a Markdown file, and writes it.
-
-    The mock reads no file, writes nothing, raises nothing, and gives 0.
 
     It turns the value of ``WEEK`` into a week with ``week_from_argument(value, context.today)``,
     where ``value`` is the value of the argument or ``None``, and raises
@@ -51,16 +57,16 @@ def run_shop(context: Context, arguments: Arguments) -> int:
     Returns:
         0 when ``replace_file`` gave ``CREATED``, and also for a week with no dish. 1 for a week
         with no menu file, for the first error of a file, or when ``replace_file`` gave
-        ``FAILED``. For a saved list, the output has four blocks with one empty line between two
+        ``FAILED``. For a saved list, the output has these blocks with one empty line between two
         blocks. First ``LIST_HEADING`` with ``week=str(week)``, ``dates`` as ``week.date_range``,
         and ``meals`` and ``dishes`` as ``MEAL_COUNT`` and ``DISH_COUNT`` picked by
         ``meal_count`` and ``dish_count`` of the list, each with ``count`` set to that number.
         Then, for each group in its order, the line of the category's name and the lines of
         ``format_table(rows, indent=2, min_widths=(width,))``, where ``rows`` holds the
-        ingredient's name and ``amount_text`` of each line and ``width`` is the largest
+        ingredient's name and ``amount_text`` of each line. The ``width`` is the largest
         ``display_width`` of a line of a name of the whole list, each name split by
-        ``str.splitlines``, or ``NOTHING_TO_BUY`` for a list with no
-        group. Then ``PANTRY_LINE`` with ``items`` as ``comma_list`` of the names of
+        ``str.splitlines``. A list with no group gives ``NOTHING_TO_BUY`` in place of the
+        groups. Then ``PANTRY_LINE`` with ``items`` as ``comma_list`` of the names of
         ``pantry_used``, in that order, only when one is used. Last ``SAVED`` with
         ``file=str(path)``. For an error, the error stream gets the three lines of
         ``stop_at_error``. For ``FAILED``, three lines go to ``context.err``, with nothing on
@@ -77,4 +83,36 @@ def run_shop(context: Context, arguments: Arguments) -> int:
             December 9999.
         OverflowError: Passed on from ``week_from_argument`` for ``next`` from 25 December 9999.
     """
-    return 0
+    value = arguments.values[0] if arguments.values else None
+    week = week_from_argument(value, context.today)
+    if week is None:
+        # Only a value that is given can fail, so it is a str here.
+        raise UsageError(NOT_A_WEEK, None, week=cast(str, value))
+    return _shop(context, week)
+
+
+def _shop(context: Context, week: IsoWeek) -> int:
+    """Reads the week, builds its list, saves it, and writes the output.
+
+    Args:
+        context: The language, the data folder, the settings, and the streams.
+        week: The week to shop for.
+
+    Returns:
+        The exit code of ``run_shop``.
+    """
+    files = read_week_files(context, week)
+    if isinstance(files, int):
+        return files
+    menu, recipes, catalog, pantry = files
+    shopping = build_shopping_list(menu, recipes, catalog, pantry)
+    if shopping.dish_count == 0:
+        context.out.write(f"{NO_DISHES.render(context.lang, week=str(week))}\n")
+        return 0
+    path = context.folder.shopping_file(str(week))
+    creation = replace_file(context.folder, path, file_text(shopping, context.lang))
+    if creation.outcome is FileOutcome.CREATED:
+        context.out.write(list_output(shopping, context.lang, path))
+        return 0
+    context.err.write(failure_output(context, creation))
+    return 1
