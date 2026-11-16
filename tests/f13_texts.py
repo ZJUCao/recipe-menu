@@ -1,13 +1,12 @@
 """The expected texts of F13: the output of ``shop`` for the example week, its files, and the lines.
 
-Every text is written out as a literal, so a test imports no message of ``shop`` or of
-``datafile`` and reads no prototype file. Nothing here calls an interface of F13 when the module
-is imported. A problem of the readers is a ``Prob`` of ``f07_texts``, and ``stop`` of
-``f09_texts`` gives the three lines of ``stop_at_error`` for it.
-
-``shop_47`` and ``shop_47_zh`` are the two outputs of the F13 prototype, with the full path of
-the list file in their last line. ``PROTOTYPE_FILE`` is the file of the Chinese run, and
-``FILE_47`` the file of the English run.
+Every text is written out as a literal, so a test reads no message of ``shop`` or of ``datafile``
+and no prototype file. The two outputs and the file of the Chinese run are those of the F13
+prototype, the file of an English run follows the F13 design, and each output ends with the full
+path of the list file. The module also holds the lines of a week with no dish, of a failed save,
+and of a parent that is not a folder. Nothing here calls an interface of F13 when the module is
+imported. At import the module holds lists of texts, two byte strings, and functions. The texts
+of a problem of the readers and of its stop lines are in ``f07_texts`` and ``f09_texts``.
 """
 
 from pathlib import Path

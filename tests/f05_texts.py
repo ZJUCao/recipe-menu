@@ -1,6 +1,12 @@
 """The texts of F05 that the tests share: the help, the hint lines, and the settings messages.
 
-Every text is written out in full as a literal, so a test does not import a message of the code.
+The help texts, the settings messages, and the hint line about creating the data folder are
+written out in full as literals, so a test does not take them from the code. The two hint lines
+that point to the help after a usage error, and the line that points to check after a stop at an
+error in a data file, are the exception: they are rendered at import from the messages of the
+text module, and a test gets the same lines from here. The module also holds the expected
+results of a call that fails, the places of the settings, and the checks of the settings
+problems. Nothing here calls an interface of F05 when the module is imported.
 """
 
 from collections.abc import Sequence
@@ -98,7 +104,7 @@ BARE_HELP_ZH_LINES = (
     "“周”是 ISO 周，比如 2026-W47，也可以是 this（本周）或 next（下周）。默认：本周。",
 )
 
-# ----------------------------------------------------- lines that follow a usage error
+# ------------------------------------ hint lines rendered from the messages of the text module
 
 OPTIONS_EN = RUN_HELP_FOR_OPTIONS.render(EN)
 OPTIONS_ZH = RUN_HELP_FOR_OPTIONS.render(ZH)
