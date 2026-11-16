@@ -1,7 +1,7 @@
 ---
 troy-doc: "requirements"
 lang: "en"
-version: "2.1"
+version: "2.2"
 updated: "2026-11-16"
 status: "Approved by Troy on 2026-11-15"
 mirror: "requirements.zh-CN.md"
@@ -114,19 +114,19 @@ Each prototype is a PowerShell session in Windows Terminal that runs the same co
 
 | ID | Feature | Hard dependencies | Soft dependencies | Version | Status |
 | --- | --- | --- | --- | --- | --- |
-| F01 | Quantities and units | None | None | v0.1 | Passes tests on main |
-| F02 | Bilingual terminal output | None | None | v0.1 | Passes tests on main |
-| F03 | Catalog and pantry | None | F01, F02 | v0.1 | Passes tests on main |
-| F04 | Recipe files | None | F01, F02, F03 | v0.1 | Passes tests on main |
-| F05 | Command line and settings | None | F02 | v0.1 | Passes tests on main |
-| F06 | Week menu files | None | F04, F05 | v0.1 | Passes tests on main |
-| F07 | Check the data files | F05 | F03, F04, F06 | v0.1 | Passes tests on main |
-| F08 | Start a data folder | F05 | F03, F04, F07 | v0.1 | Passes tests on main |
-| F09 | List and show recipes | F05 | F01, F02, F04 | v0.1 | Passes tests on main |
-| F10 | Search recipes | F05 | F03, F04, F09 | v0.1 | Passes tests on main |
-| F11 | Create and show a week menu | F05 | F02, F06 | v0.1 | Passes tests on main |
-| F12 | Build the shopping list | None | F01, F03, F04, F06 | v0.1 | Passes tests on main |
-| F13 | Shopping list command | F05 | F02, F12 | v0.1 | Ran for real on Troy's PC |
+| F01 | Quantities and units | None | None | v0.1 | Usable on Troy's devices |
+| F02 | Bilingual terminal output | None | None | v0.1 | Usable on Troy's devices |
+| F03 | Catalog and pantry | None | F01, F02 | v0.1 | Usable on Troy's devices |
+| F04 | Recipe files | None | F01, F02, F03 | v0.1 | Usable on Troy's devices |
+| F05 | Command line and settings | None | F02 | v0.1 | Usable on Troy's devices |
+| F06 | Week menu files | None | F04, F05 | v0.1 | Usable on Troy's devices |
+| F07 | Check the data files | F05 | F03, F04, F06 | v0.1 | Usable on Troy's devices |
+| F08 | Start a data folder | F05 | F03, F04, F07 | v0.1 | Usable on Troy's devices |
+| F09 | List and show recipes | F05 | F01, F02, F04 | v0.1 | Usable on Troy's devices |
+| F10 | Search recipes | F05 | F03, F04, F09 | v0.1 | Usable on Troy's devices |
+| F11 | Create and show a week menu | F05 | F02, F06 | v0.1 | Usable on Troy's devices |
+| F12 | Build the shopping list | None | F01, F03, F04, F06 | v0.1 | Usable on Troy's devices |
+| F13 | Shopping list command | F05 | F02, F12 | v0.1 | Usable on Troy's devices |
 | F14 | Suggest a week menu | F05 | F06, F11 | v0.2 | Not started |
 | F15 | Add a recipe | F05 | F03, F04, F07 | v0.2 | Not started |
 | F16 | Edit a recipe | F05 | F07 | v0.2 | Not started |
@@ -286,3 +286,4 @@ Topological order: F01, F02, F03, F04, F05, F06, F07, F08, F09, F10, F11, F12, F
 | 1.13 | 2026-11-15 | The English pantry line of the F13 prototype writes the catalog's names as written, such as `Cooking oil`, as Troy decided in the F13 design. |
 | 2.0 | 2026-11-15 | Approved by Troy. |
 | 2.1 | 2026-11-16 | F13 ran for real on Troy's PC. |
+| 2.2 | 2026-11-16 | Troy accepted v0.1.0 on Troy's devices: F01 to F13 are usable on Troy's devices. |
