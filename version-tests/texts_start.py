@@ -1,8 +1,11 @@
 """Expected texts of the start and check flow (F05, F07, F08), from the prototypes.
 
 Every text is a tuple of lines written out as literals, so no test reads a prototype file.
-`<data>` stands for the data folder (the folder recipe-menu in the home folder by default)
-and `<home>` for the home folder. `support.text` fills them in.
+`<data>` stands for the data folder (the folder recipe-menu in the home folder by default).
+The helper module ``support`` fills it in.
+
+At import the module holds only these tuples of text lines, and it imports nothing and calls
+nothing.
 """
 
 # F05 "Help in English", output 1.

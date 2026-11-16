@@ -1,8 +1,8 @@
 """Expected texts of the find-a-recipe flow (F09, F10), from the prototypes.
 
 Every text is a tuple of lines written out as literals, so no test reads a prototype file.
-`<data>` stands for the data folder (the folder recipe-menu in the home folder by default)
-and `<home>` for the home folder. `support.text` fills them in.
+At import the module holds only these tuples of text lines, and it imports nothing and calls
+nothing.
 """
 
 # F09 "List the recipes", output 1.

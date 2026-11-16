@@ -1,8 +1,19 @@
 """Helpers of the version tests: run ``recipe-menu`` as a user does, and read the results.
 
-A test runs the program as a new process, the way Troy types it, and reads its exit code, its
-output streams, and its files. No test imports ``recipe_menu``. Expected texts are tuples of lines
-written out as literals in the ``texts_*`` modules, and ``text`` turns them into a string.
+A test runs the program as a new process, the way Troy types it, with a home folder and a working
+folder of its own, and reads its exit code, its output streams, and its files. The helpers also
+build the data folders of a scenario (a copy of the example data or the folder that ``init``
+makes), write, read, and change data files in UTF-8 with LF line ends, save the files of a folder
+again with a byte order mark and CRLF line ends, split a table line into its cells, delete the menu
+files of the data folder, record the state of files and folders, and check a run against expected
+lines. They also read the PC's date, give the ISO week of a date, and run a scenario again when the
+date changes during it. The expected texts of the flows are in the ``texts_*`` modules, and those of
+PT01 in ``pt01_folder``.
+
+The module imports nothing of ``recipe_menu``: only the program runs, as a new process.
+At import it starts no process and reads and writes no file. It only works out three paths (the
+repository root, the example data, and the installed program) and the time limit of a run, and
+defines its classes and functions.
 """
 
 import os
