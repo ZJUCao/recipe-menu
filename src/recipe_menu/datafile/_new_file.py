@@ -15,13 +15,20 @@ _ASCII_FOLD: Final = str.maketrans("ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmn
 
 
 class FileOutcome(Enum):
-    """What ``create_file`` found in the file's folder, or what stopped it.
+    """What ``create_file`` or ``replace_file`` found, or what stopped it.
 
-    ``CREATED`` means that the call created the file and wrote its text. ``EXISTS`` means that
-    an entry with the file's name, or with a name that differs from it only in the case of A to
-    Z, is in the file's folder. ``FAILED`` means that the listing of the folder failed or that an
-    ``OSError`` stopped the file. The call created nothing for ``EXISTS``, and it removed, or
-    tried to remove, the file for ``FAILED`` when it had created it.
+    For ``create_file``, ``CREATED`` means that the call created the file and wrote its text.
+    ``EXISTS`` means that an entry with the file's name, or with a name that differs from it only
+    in the case of A to Z, is in the file's folder. ``FAILED`` means that the listing of the
+    folder failed or that an ``OSError`` stopped the file. The call created nothing for
+    ``EXISTS``, and it removed, or tried to remove, the file for ``FAILED`` when it had created
+    it.
+
+    For ``replace_file``, ``CREATED`` means that the file at the path holds the text, whether the
+    call replaced a file or not. ``FAILED`` means that something other than a folder is at the
+    file's folder or that an ``OSError`` stopped a step, and, when its open of the temporary
+    file had succeeded, the call removed, or tried to remove, that file. ``replace_file`` never
+    gives ``EXISTS``.
     """
 
     CREATED = "created"
@@ -31,7 +38,10 @@ class FileOutcome(Enum):
 
 @dataclass(frozen=True, slots=True)
 class FileCreation:
-    """The result of ``create_file``.
+    """The result of ``create_file`` or ``replace_file``.
+
+    ``replace_file`` gives only ``CREATED`` and ``FAILED``, and for ``FAILED`` its ``left`` holds
+    at most its temporary file.
 
     Two values are equal when their four fields are equal, and a ``FileCreation`` is hashable.
     The constructor checks its values, as Raises gives them.
@@ -48,8 +58,9 @@ class FileCreation:
         outcome: What happened.
         problem: What stopped the call, as a problem. A ``Problem`` with ``Severity.ERROR`` for
             ``FAILED``, and ``None`` for the other outcomes.
-        left: The file, as a full path, when the call created it and could not remove it after
-            the failure. Empty or one path for ``FAILED``, and empty for the other outcomes.
+        left: The file, or for ``replace_file`` its temporary file, as a full path, when the call
+            created it and could not remove it after the failure. Empty or one path for
+            ``FAILED``, and empty for the other outcomes.
         existing: The entry that is already there, as a full path. A ``Path`` for ``EXISTS``, and
             ``None`` for the other outcomes.
 
