@@ -1,7 +1,10 @@
 # Run file of F13-shop.md: how the real run sets up each section.
 # The prototype: "F12 builds the list, and F13 prints and saves it. ... The data folder holds the
-# example data in `example-data.md`, including `menus\2026-W47.toml`." Every command runs
-# `recipe-menu shop`, which comes with F13.
+# example data in `example-data.md`, including `menus\2026-W47.toml`."
+#
+# The prototype runs in the week of 2026-W46: its output names 2026-W47 for `next` and 2026-W46
+# for `this`. So `next` and `this` are replaced by those weeks, as the run takes place on another
+# day.
 
 [paths]
 'C:\Users\Troy' = '<home>'
@@ -14,10 +17,24 @@ copy = [{ from = "tests/data/example", to = '<home>\recipe-menu' }]
 mkdir = ['<home>\recipe-menu\shopping']
 
 [sections."In English"]
-later = [{ feature = "F13" }]
+commands = [
+  { typed = "recipe-menu shop next", run = "recipe-menu shop 2026-W47", reason = "next is 2026-W47 in the prototype, whose list is for 2026-W47 and whose this week is 2026-W46" },
+]
 
 [sections."In Chinese"]
-later = [{ feature = "F13" }]
+commands = [
+  { typed = "recipe-menu shop next --lang zh", run = "recipe-menu shop 2026-W47 --lang zh", reason = "next is 2026-W47 in the prototype, whose list is for 2026-W47 and whose this week is 2026-W46" },
+]
 
+# "`shopping\2026-W47.md` after the Chinese run."
+[sections."The saved file"]
+start = "previous"
+files = [{ path = '<home>\recipe-menu\shopping\2026-W47.md', block = 1 }]
+
+# "No menu, or an empty menu": the example has no menu for 2026-W48, and an empty menu for
+# 2026-W46 is the file that `menu new` creates.
 [sections."No menu, or an empty menu"]
-later = [{ feature = "F13" }]
+start = { copy = [{ from = "tests/data/example", to = '<home>\recipe-menu' }], mkdir = ['<home>\recipe-menu\shopping'], setup = ["recipe-menu menu new 2026-W46"] }
+commands = [
+  { typed = "recipe-menu shop this", run = "recipe-menu shop 2026-W46", reason = "this is 2026-W46 in the prototype, whose output names 2026-W46" },
+]
