@@ -12,13 +12,6 @@ unset = ["RECIPE_MENU_DATA"]
 copy = [{ from = "tests/data/example", to = '<home>\recipe-menu' }]
 mkdir = ['<home>\recipe-menu\shopping']
 
-# "In v0.1 the help lists the v0.1 commands": the line of shop comes with F13.
-[sections."Help in English"]
-later = [{ feature = "F13", typed = "recipe-menu --help" }]
-
-[sections."Help in Chinese"]
-later = [{ feature = "F13", typed = "recipe-menu --help --lang zh" }]
-
 # "After you set `language = "zh"` in `settings.toml`".
 [sections."The language from the settings"]
 replace = [{ file = '<home>\recipe-menu\settings.toml', text = 'language = "en"', with = 'language = "zh"' }]

@@ -1,8 +1,8 @@
 ---
 troy-doc: "requirements"
 lang: "en"
-version: "2.0"
-updated: "2026-11-15"
+version: "2.1"
+updated: "2026-11-16"
 status: "Approved by Troy on 2026-11-15"
 mirror: "requirements.zh-CN.md"
 ---
@@ -126,7 +126,7 @@ Each prototype is a PowerShell session in Windows Terminal that runs the same co
 | F10 | Search recipes | F05 | F03, F04, F09 | v0.1 | Passes tests on main |
 | F11 | Create and show a week menu | F05 | F02, F06 | v0.1 | Passes tests on main |
 | F12 | Build the shopping list | None | F01, F03, F04, F06 | v0.1 | Passes tests on main |
-| F13 | Shopping list command | F05 | F02, F12 | v0.1 | Not started |
+| F13 | Shopping list command | F05 | F02, F12 | v0.1 | Ran for real on Troy's PC |
 | F14 | Suggest a week menu | F05 | F06, F11 | v0.2 | Not started |
 | F15 | Add a recipe | F05 | F03, F04, F07 | v0.2 | Not started |
 | F16 | Edit a recipe | F05 | F07 | v0.2 | Not started |
@@ -285,3 +285,4 @@ Topological order: F01, F02, F03, F04, F05, F06, F07, F08, F09, F10, F11, F12, F
 | 1.12 | 2026-11-15 | F12 passes tests on main. |
 | 1.13 | 2026-11-15 | The English pantry line of the F13 prototype writes the catalog's names as written, such as `Cooking oil`, as Troy decided in the F13 design. |
 | 2.0 | 2026-11-15 | Approved by Troy. |
+| 2.1 | 2026-11-16 | F13 ran for real on Troy's PC. |
