@@ -1,9 +1,9 @@
 ---
 troy-doc: "v0.1-test-plan"
 lang: "zh-CN"
-version: "0.3"
+version: "1.0"
 updated: "2026-11-16"
-status: "草稿。"
+status: "Troy 已于 2026-11-16 验收"
 mirror-of: "test-plan.md"
 ---
 
@@ -118,7 +118,9 @@ PT01 是唯一的性能指标（[需求 7.1](../../requirements.zh-CN.md#71-性�
 
 ## 5. 验收记录
 
-无。
+| 日期 | 结果 | Troy 的备注 |
+| --- | --- | --- |
+| 2026-11-16 | 已验收为 v0.1.0 | Troy ran v0.1-S24, v0.1-S25, and v0.1-S26 on Troy's devices and replied: "All accepted". No bug was deferred. |
 
 ## 6. 修改记录
 
@@ -127,3 +129,4 @@ PT01 是唯一的性能指标（[需求 7.1](../../requirements.zh-CN.md#71-性�
 | 0.1 | 2026-11-10 | 初稿。 |
 | 0.2 | 2026-11-15 | v0.1-S16 要求的英文常备行按目录的写法写出名称，即 `Cooking oil, Salt, Sugar`，因为 Troy 在 F13 设计里选了这样的一行。 |
 | 0.3 | 2026-11-16 | v0.1-S06 从示例文件夹开始，期望 F07“A syntax mistake”一节的输出保持原样，因为那一节现在也显示示例文件夹给出的警告。v0.1-S01 到 v0.1-S23 的步骤运行项目环境里的 `recipe-menu` 命令，而不是 `python -m recipe_menu`。 |
+| 1.0 | 2026-11-16 | Troy 验收为 v0.1.0。 |

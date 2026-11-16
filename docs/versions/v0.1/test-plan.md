@@ -1,9 +1,9 @@
 ---
 troy-doc: "v0.1-test-plan"
 lang: "en"
-version: "0.3"
+version: "1.0"
 updated: "2026-11-16"
-status: "Draft."
+status: "Accepted by Troy on 2026-11-16"
 mirror: "test-plan.zh-CN.md"
 ---
 
@@ -118,7 +118,9 @@ PT01 is the only performance target ([requirements 7.1](../../requirements.md#71
 
 ## 5. Acceptance record
 
-None.
+| Date | Result | Troy's notes |
+| --- | --- | --- |
+| 2026-11-16 | Accepted as v0.1.0 | Troy ran v0.1-S24, v0.1-S25, and v0.1-S26 on Troy's devices and replied: "All accepted". No bug was deferred. |
 
 ## 6. Change log
 
@@ -127,3 +129,4 @@ None.
 | 0.1 | 2026-11-10 | First draft. |
 | 0.2 | 2026-11-15 | v0.1-S16 expects the English pantry line with the catalog's names as written, `Cooking oil, Salt, Sugar`, because Troy chose that line in the F13 design. |
 | 0.3 | 2026-11-16 | v0.1-S06 starts from the example folder and expects the output of F07 "A syntax mistake" unchanged, because that section now also shows the warning that the example folder gives. The steps of v0.1-S01 to v0.1-S23 run the `recipe-menu` command of the project's environment in place of `python -m recipe_menu`. |
+| 1.0 | 2026-11-16 | Accepted by Troy as v0.1.0. |
