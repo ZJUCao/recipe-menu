@@ -1,10 +1,13 @@
 """The expected texts of F11: the outputs of both commands, the new file, and the messages.
 
-Every text is written out as a literal, so a test imports no message of ``menu`` or ``menus`` and
-reads no prototype file. Nothing here calls an interface of F11 when the module is imported. The
-functions at the end build the texts that the test plan calls ``NEW``, ``EXISTS``, ``FAIL``,
-``LEFT``, ``NO_MENU``, ``NOT_A_WEEK``, and ``EMPTY``. The blocks A to F are the
-outputs of ``menu show`` that the cases name, as lists of lines. U+00D7 and U+2014 are written as
+Every text but the output of an empty menu is written out as a literal, so a test imports no
+message of ``menu`` or ``menus`` and reads no prototype file. The output of an empty menu takes its
+dates from F06 and its table layout from F02, as the test plan says, and uses no code of F11.
+Nothing here calls an interface of F11 when the module is imported. The module holds the helps,
+the blocks A to F of the test plan as lists of lines, the menu file of the prototype, the dates of
+the case weeks, the labels and headings of the meals, the meal sets, the ``menu show`` output of
+the example week, and the outputs of a new file, an existing file, a failure, a file left behind,
+a missing menu, a value that is not a week, and an empty menu. U+00D7 and U+2014 are written as
 escapes.
 """
 

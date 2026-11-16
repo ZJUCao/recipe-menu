@@ -4,7 +4,7 @@ Every text is written out as a literal, so a test imports no message of ``search
 prototype file. Nothing here calls an interface of F10 when the module is imported. Blocks A to F
 are the blocks of the test plan: each ``PS>`` line gives the words after ``search``, and the lines
 that follow it up to its count line are its output, with exit code 0 and an empty error stream.
-``found`` and ``none`` give the result of a search.
+The module also builds the results of a search and of its usage errors.
 """
 
 import shlex

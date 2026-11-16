@@ -1,17 +1,11 @@
 """Helpers and example values that the F12 tests share.
 
-Nothing here calls an interface of F12 when the module is imported. At import the module holds
-only texts, numbers, and tuples, lists, and dicts of them, and enum members.
-Functions make every ``ShoppingLine``, ``ShoppingGroup``, and ``ShoppingList``, so the test files
-import against the mock and against a broken implementation.
-
-The cases write their values in the notation of the test plan, and the functions here read it:
-
-* ``recipes_of(catalog, "three 3: <lines>")`` is ``R(three, 3: <lines>)``, and a recipe with no
-  number has 2 servings.
-* ``menu_of("monday dinner: three 2, one 100")`` is a slot with two dishes. Every other slot
-  holds no dish.
-* ``amt("200/3 G")`` is ``200/3 G``, and ``line(catalog, name, "200/3 G")`` is ``name: 200/3 G``.
+Nothing here calls an interface of F12 when the module is imported. At import the module builds
+only texts, ``None``, tuples, lists, dicts, enum members, and the empty pantry. It makes shopping
+lines, groups, and lists only inside its functions, so the test files import against the mock and
+against a broken implementation. It also reads the files of a week as the shopping command does
+and writes the folders of two v0.1 scenarios. The cases write their values in the notation of the
+test plan, and the doc comment of each function that reads it says how.
 """
 
 from collections.abc import Iterable, Mapping, Sequence
@@ -267,7 +261,10 @@ def menu_of(*cells: str, meals: Sequence[Meal] = LUNCH_DINNER, week: int = 48) -
 def every_slot(
     text: str, meals: Sequence[Meal] = EVERY_MEAL, week: int = 48, times: int = 1
 ) -> WeekMenu:
-    """Builds a menu that holds the same dishes ``times`` times in each slot of every day."""
+    """Builds a menu that holds the same dishes ``times`` times in each slot of every day.
+
+    ``text`` holds dishes as a cell of ``menu_of`` writes them, such as ``"rice 2"``.
+    """
     body = ", ".join([text] * times)
     return menu_of(
         *(f"{day.value} {meal.value}: {body}" for day in Day for meal in meals),
@@ -286,7 +283,10 @@ def amt(text: str) -> Quantity:
 
 
 def line(catalog: Catalog, name: str, *amounts: Quantity | str) -> ShoppingLine:
-    """Builds ``name: amounts`` of the plan, with the catalog's ingredient of that name."""
+    """Builds ``name: amounts`` of the plan, with the catalog's ingredient of that name.
+
+    An amount is a ``Quantity`` or a text that ``amt`` reads, such as ``"200/3 G"``.
+    """
     items = tuple(item if isinstance(item, Quantity) else amt(item) for item in amounts)
     return ShoppingLine(find(catalog, name), items)
 
