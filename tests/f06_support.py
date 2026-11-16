@@ -3,8 +3,11 @@
 Nothing here makes an ``IsoWeek``, a ``Dish``, a ``MealSlot``, a ``WeekMenu``, or a ``Settings``
 when the module is imported, because the mock leaves out the checks of their constructors, and
 a value made at import would stop pytest from collecting the test files. At import the module
-holds only texts, numbers, and tuples of them. Functions make every value, and none calls an
-interface of ``menus`` at import.
+builds texts, a date, a path, tuples of texts, dicts of such tuples, and a place in both
+languages, and it imports a message of the code from the menus module. Functions make every
+other value, and none calls an interface of F06 at import. The helpers give the places and
+messages of the menu reader's problems, the settings and menu values, write and read a menu
+file and check the result, and stand in for ``menu show``.
 """
 
 from collections.abc import Mapping, Sequence

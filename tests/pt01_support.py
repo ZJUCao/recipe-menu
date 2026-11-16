@@ -1,12 +1,14 @@
-"""The PT01 data folder and the timed runs of ``recipe-menu`` commands on it.
+"""The PT01 data folder, the timed runs of ``recipe-menu`` commands on it, and their output.
 
 PT01 is the performance target of requirements 7.1: 1,000 recipes, 300 catalog ingredients, and
-52 week menus. ``make_pt01`` writes the folder with the shape that the v0.1 test plan gives
-v0.1-S27, and ``timed_runs`` times ``python -m recipe_menu check`` on it. ``command_run`` and
-``command_runs`` time any command, and ``pt01_list``, ``pt01_show``, ``pt01_search``, and
-``pt01_menu_show`` give the expected output of ``list``, ``show recipe-0500``, a search, and
-``menu show 2026-W26`` on the folder. Nothing here calls an interface of a command when the
-module is imported.
+52 week menus, in the shape that the v0.1 test plan gives v0.1-S27. The module writes the folder,
+times commands run as ``python -m recipe_menu`` on it, and gives the expected output of four
+commands on it, built from the rules of the generator and not with the formatting code of the
+commands. It also holds the expected output of ``check`` and of the report after the mistakes,
+puts a mistake in the last recipe and the last menu and checks the two errors, checks the result
+of every timed run, gives the time limit, and records the times for the JUnit report. Nothing
+here calls an interface of a command when the module is imported. At import the module holds
+numbers, texts, a list and tuples of texts, a path, and functions.
 """
 
 import statistics

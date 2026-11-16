@@ -1,9 +1,12 @@
 """Helpers and expected texts that the F08 tests share.
 
-The module holds the fault harness, the steps of ``create_data_folder``, the trees of a folder,
-the links and hidden files, and the message from the system. The expected texts of the test
-plan are in ``f08_texts``. It calls no interface of F08 and makes no ``Creation`` when it is
-imported. At import it holds only texts, numbers, and functions.
+The module holds the fault harness that stands in for the calls of the system on a folder, the
+exceptions that the harness raises, the steps and records of a data folder, the trees of a
+folder, and the message from the system. It runs ``init`` through the command line and turns
+Ctrl+C into a failure, checks a failed creation and the file of a problem, and makes the links
+and hidden files. The expected texts of the test plan are in ``f08_texts``. It calls no
+interface of F08 and makes no ``Creation`` when it is imported. At import the module holds texts,
+``None``, a path, tuples, partial functions, classes, and functions.
 """
 
 import builtins
