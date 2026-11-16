@@ -1,9 +1,9 @@
 ---
 troy-doc: "requirements"
 lang: "zh-CN"
-version: "1.12"
+version: "2.0"
 updated: "2026-11-15"
-status: "Troy 已于 2026-11-10 批准"
+status: "Troy 已于 2026-11-15 批准"
 mirror-of: "requirements.md"
 ---
 
@@ -283,3 +283,5 @@ flowchart LR
 | 1.10 | 2026-11-14 | F10 在 main 上通过测试。 |
 | 1.11 | 2026-11-15 | F11 在 main 上通过测试。 |
 | 1.12 | 2026-11-15 | F12 在 main 上通过测试。 |
+| 1.13 | 2026-11-15 | F13 原型的英文常备食材一行按目录的写法显示名称，比如 `Cooking oil`，这是 Troy 在 F13 设计里的决定。 |
+| 2.0 | 2026-11-15 | Troy 批准。 |
