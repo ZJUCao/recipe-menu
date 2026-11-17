@@ -6,6 +6,7 @@ from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
+from random import Random
 from typing import TextIO
 
 from recipe_menu import __version__
@@ -45,6 +46,7 @@ def main(
     stdout: TextIO | None = None,
     stderr: TextIO | None = None,
     commands: Sequence[Command] | None = None,
+    random: Random | None = None,
 ) -> int:
     r"""Runs the ``recipe-menu`` command line and gives its exit code.
 
@@ -64,6 +66,8 @@ def main(
         commands: The commands, in the order of the help. ``None`` gives ``COMMANDS``. No two
             commands have the same words, and no one-word command has the first word of a
             two-word command.
+        random: The generator of the command. ``None`` gives ``Random()``, which seeds itself
+            from the system, so each run chooses anew. The mock does not pass it on yet.
 
     Returns:
         The exit code. It is 0 for the help, the version, or a command that worked. It is 1

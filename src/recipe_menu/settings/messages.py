@@ -12,6 +12,10 @@ LANGUAGE: Final[Message] = Message("language", "语言")
 MEALS: Final[Message] = Message("meals", "餐次")
 MEAL_N: Final[Message] = Message("meal {number}", "餐次 {number}")
 SERVINGS: Final[Message] = Message("servings", "份数")
+# ``DISHES`` names the key ``dishes``. ``DISHES_OF`` names the number of one meal in it, with
+# ``{meal}`` set to the meal's label.
+DISHES: Final[Message] = Message("dishes", "菜数")
+DISHES_OF: Final[Message] = Message("dishes of {meal}", "{meal}的菜数")
 
 # The names of the meals: a label inside a sentence, and a heading at the top of a column.
 BREAKFAST_LABEL: Final[Message] = Message("breakfast", "早餐")
@@ -33,4 +37,12 @@ UNKNOWN_MEAL: Final[Message] = Message(
 NO_MEALS: Final[Message] = Message(
     '"meals" must name at least one meal. The meals are {meals}.',
     "“meals”至少要写上一个餐次。可用的餐次：{meals}。",
+)
+DISHES_NOT_A_TABLE: Final[Message] = Message(
+    '"dishes" must be a table in braces, such as dishes = {{ dinner = 2 }}.',
+    "“dishes”必须是放在花括号里的表，比如 dishes = {{ dinner = 2 }}。",
+)
+DISHES_NOT_1_TO_10: Final[Message] = Message(
+    "The number of dishes must be a whole number from 1 to 10, such as 2.",
+    "菜数必须是 1 到 10 之间的整数，比如 2。",
 )

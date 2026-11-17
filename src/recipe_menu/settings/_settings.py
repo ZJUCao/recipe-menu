@@ -29,9 +29,9 @@ def _check_meals(meals: object) -> None:
 
 @dataclass(frozen=True, slots=True)
 class Settings:
-    """The settings of a data folder: the language, the meals of each day, and the servings.
+    """The settings of a data folder: language, meals of each day, servings, and dishes.
 
-    ``Settings()`` gives the defaults. Two settings are equal when their three fields are equal,
+    ``Settings()`` gives the defaults. Two settings are equal when their four fields are equal,
     and a ``Settings`` is hashable.
 
     Attributes:
@@ -41,6 +41,8 @@ class Settings:
             each once.
         servings: The servings of a dish that gives none: from ``MIN_SERVINGS`` to
             ``MAX_SERVINGS``, which are 1 and 100. Not a ``bool``.
+        dishes: The number of dishes of breakfast, lunch, and dinner, in the order of ``Meal``:
+            exactly three whole numbers from 1 to 10, none a ``bool``.
 
     Raises:
         TypeError: ``language`` is neither a ``Lang`` nor ``None``, such as the text ``"zh"``.
@@ -53,6 +55,7 @@ class Settings:
     language: Lang | None = None
     meals: tuple[Meal, ...] = (Meal.LUNCH, Meal.DINNER)
     servings: int = 2
+    dishes: tuple[int, int, int] = (1, 1, 1)
 
     def __post_init__(self) -> None:
         """Checks the fields.
@@ -68,3 +71,14 @@ class Settings:
             raise TypeError("servings must be an int")
         if not MIN_SERVINGS <= self.servings <= MAX_SERVINGS:
             raise ValueError(f"servings must be from {MIN_SERVINGS} to {MAX_SERVINGS}")
+
+    def dishes_for(self, meal: Meal) -> int:
+        """Gives the number of dishes of a meal.
+
+        Args:
+            meal: Any ``Meal``, also one that ``meals`` does not name.
+
+        Returns:
+            ``dishes[list(Meal).index(meal)]``. The mock gives 1.
+        """
+        return 1

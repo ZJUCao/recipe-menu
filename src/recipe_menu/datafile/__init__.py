@@ -14,6 +14,7 @@ from recipe_menu.datafile._shape import (
     read_text,
     report_unknown_keys,
 )
+from recipe_menu.datafile._text import parse_toml, read_file_text
 from recipe_menu.datafile._toml import read_toml
 from recipe_menu.datafile.messages import (
     EMPTY_ITEM,
@@ -48,6 +49,8 @@ __all__ = [
     "create_data_folder",
     "create_file",
     "list_toml_files",
+    "parse_toml",
+    "read_file_text",
     "read_list",
     "read_servings",
     "read_table",

@@ -1,7 +1,8 @@
 """What a command gets from the outside world."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date
+from random import Random
 from typing import TextIO
 
 from recipe_menu.datafile import DataFolder
@@ -14,7 +15,8 @@ class Context:
     """What a command gets from the outside world through ``cli``.
 
     ``cli`` builds it, and a test can build one with fixed values. Two contexts are equal when
-    their six fields are equal, and the streams compare as objects. A ``Context`` is hashable.
+    their seven fields are equal, and the streams and the generator compare as objects. A
+    ``Context`` is hashable.
 
     Attributes:
         lang: The language that ``cli`` picked.
@@ -27,6 +29,9 @@ class Context:
         out: Where the command writes its output. Open.
         err: Where the command writes a message that ends it with exit code 1. Open.
         today: Today's date on the PC, from which ``this`` and ``next`` weeks are found.
+        random: The generator that a command draws its random choices from. ``cli`` passes the
+            generator that ``main`` got or made. Without it, a new ``Random(0)`` for each
+            context, so a test that builds a context gets the same choices every time.
     """
 
     lang: Lang
@@ -35,3 +40,4 @@ class Context:
     out: TextIO
     err: TextIO
     today: date
+    random: Random = field(default_factory=lambda: Random(0))  # noqa: S311 - a fixed seed, no security
