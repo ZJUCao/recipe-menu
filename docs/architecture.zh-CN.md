@@ -1,9 +1,9 @@
 ---
 troy-doc: "architecture"
 lang: "zh-CN"
-version: "4.0"
-updated: "2026-11-14"
-status: "Troy 已于 2026-11-14 批准"
+version: "5.0"
+updated: "2026-11-17"
+status: "Troy 已于 2026-11-17 批准"
 mirror-of: "architecture.md"
 ---
 
@@ -165,14 +165,14 @@ flowchart TD
 | `DataFolder` | datafile | 根文件夹，以及 5.1 里每个文件的路径。 | 唯一知道各文件名称的地方。 |
 | `Problem` | datafile | `severity`（错误或警告）、`file`（相对于数据文件夹的路径）、`place`（行号或字段，两种语言）和 `message`（一个 `Message` 和它的值）。 | 读取函数返回问题，从不把问题当异常抛出。 |
 | `Category` | catalog | `key: str` 和 `name: BiText`。 | 文件里的顺序就是购物顺序。 |
-| `Ingredient` | catalog | 两种语言都有的 `name: BiText`、`category: Category`，以及默认单位 `unit: Unit 或 None`。 | 两种语言的名称都不能重复。菜谱和常备清单引用同一个 `Ingredient` 值，所以购物清单按同一对象合并食材。 |
+| `Ingredient` | catalog | 两种语言都有的 `name: BiText`、`category: Category`，以及默认单位 `unit: Unit 或 None`。 | 两种语言的名称都不能重复。菜谱和常备清单引用目录自己的 `Ingredient` 值。购物清单合并相等的食材；对读取函数给出的值来说，相等的食材就是同一个对象（F12 设计，选择 3）。 |
 | `Tag` | catalog | 两种语言都有的 `name: BiText`。 | |
 | `Catalog` | catalog | 分类、食材和标签，按文件顺序排列。 | 按任一语言的名称找到食材或标签。 |
 | `Pantry` | catalog | 一组 `Ingredient` 值。 | |
 | `Recipe` | recipes | `id: str`、`name: BiText`、`servings: int`（1 或更多）、`tags: tuple[Tag, ...]`、`ingredients: tuple[RecipeIngredient, ...]`，以及每种语言一组字符串元组形式的步骤。 | ID 是去掉 `.toml` 的文件名。ID 按原样精确比较，所以 Windows 和 Linux 的结果相同。 |
 | `RecipeIngredient` | recipes | `ingredient: Ingredient`、`quantity: Quantity` 和 `note: BiText 或 None`。 | 没写单位的数量，读取时使用该食材的默认单位。 |
 | `Meal` | settings | 按顺序为 `BREAKFAST`、`LUNCH` 和 `DINNER`，带两种语言的名称。 | 一个 `StrEnum`，值就是文件里用的写法。 |
-| `Settings` | settings | `language: Lang 或 None`、`meals: tuple[Meal, ...]` 和 `servings: int`。 | 默认值：不指定语言，午餐和晚餐，2 份。 |
+| `Settings` | settings | `language: Lang 或 None`、`meals: tuple[Meal, ...]` 和 `servings: int`。 | 默认值：不指定语言，午餐和晚餐，2 份。v0.2 里 F14 加入 `dishes`，即每一餐几道菜，每餐 1 到 10 道，默认 1 道。 |
 | `IsoWeek` | menus | `year: int` 和 `week: int`。 | 写作 `2026-W47`。能给出它的七个日期。`this` 和 `next` 由调用方传入的今天日期算出。 |
 | `Dish` | menus | `recipe_id: str` 和 `servings: int`。 | 文件没写份数时，读取函数填入设置里的份数，所以后面的模块不需要为一道菜去读设置。 |
 | `WeekMenu` | menus | `week: IsoWeek`，以及周一到周日每天每餐的菜。 | 只包含设置里列出的几餐。 |
@@ -205,7 +205,7 @@ flowchart TD
 - 警告（比如缺一种语言）从不改变退出码。
 - `except` 子句写明它捕获的异常，而且只写在把异常变成 `Problem`、结果或 `UsageError` 的地方。没有代码捕获 `Exception`，也没有代码使用不带异常名的 `except`。
 - 解析器的英文原文从不单独出现在用户面前。`datafile` 把它认识的原因变成提示，其他原因则显示一条通用提示和行号。
-- 问题里的文件路径相对于数据文件夹，使用系统的分隔符，比如 Windows 上的 `recipes\mapo-tofu.toml`。其他提示用完整路径写出文件或文件夹。`init` 的失败是第一条规则的例外，因为它的数据文件夹是你刚刚要它创建的，而不是你每天在用的那个（ADR-0009）。失败的第一行用完整路径 `str(context.folder.root / problem.file)` 写出 `init` 没能创建的文件夹或文件。在数据文件夹本身或它上面的文件夹处失败时，问题的文件是 `Path(".")`，所以这一行写出数据文件夹。`Problem` 仍然保存相对于数据文件夹的文件（5.2）。F11 的 `menu new` 失败时，第一行用完整路径写出它没能写入的文件，或者它没能列出的文件夹 `menus\`（ADR-0010）。F13 的 `shop` 也可以用完整路径写出它没能写入的文件。
+- 问题里的文件路径相对于数据文件夹，使用系统的分隔符，比如 Windows 上的 `recipes\mapo-tofu.toml`。其他提示用完整路径写出文件或文件夹。`init` 的失败是第一条规则的例外，因为它的数据文件夹是你刚刚要它创建的，而不是你每天在用的那个（ADR-0009）。失败的第一行用完整路径 `str(context.folder.root / problem.file)` 写出 `init` 没能创建的文件夹或文件。在数据文件夹本身或它上面的文件夹处失败时，问题的文件是 `Path(".")`，所以这一行写出数据文件夹。`Problem` 仍然保存相对于数据文件夹的文件（5.2）。F11 的 `menu new` 失败时，第一行用完整路径写出它没能写入的文件，或者它没能列出的文件夹 `menus\`（ADR-0010）。F13 的 `shop` 也可以用完整路径写出它没能写入的文件。F14 的 `menu suggest` 里告诉你怎样换掉一道菜的那一行是第二条规则的例外：它像问题那样，用相对于数据文件夹的路径写出这一周的菜单文件，比如 `menus6-W48.toml`（ADR-0011）。
 - 命令的输出写到 stdout。以退出码 1 或 2 结束命令的提示写到 stderr。`check` 的报告就是它的输出，所以无论退出码是什么都写到 stdout。
 - `datafile` 以独占模式创建新文件，所以 `init` 和 `menu new` 会拒绝，而不会覆盖。要替换的文件（比如一周的购物清单）先写到同一文件夹里的临时文件，再移过去替换旧文件。
 
@@ -260,7 +260,7 @@ flowchart TD
 
 ## 11. 决策记录
 
-Troy 于 2026-11-10 批准本文档，接受了 ADR-0001 到 ADR-0007；于 2026-11-12 在 F05 设计里接受了 ADR-0008；于 2026-11-13 在 F08 设计里接受了 ADR-0009；又于 2026-11-14 在 F11 设计里接受了 ADR-0010。
+Troy 于 2026-11-10 批准本文档，接受了 ADR-0001 到 ADR-0007；于 2026-11-12 在 F05 设计里接受了 ADR-0008；于 2026-11-13 在 F08 设计里接受了 ADR-0009；于 2026-11-14 在 F11 设计里接受了 ADR-0010；又于 2026-11-17 在 F14 设计里接受了 ADR-0011。
 
 | ADR | 标题 | 状态 |
 | --- | --- | --- |
@@ -274,6 +274,7 @@ Troy 于 2026-11-10 批准本文档，接受了 ADR-0001 到 ADR-0007；于 2026
 | ADR-0008 | 用法错误的提示行、数据文件夹的检查，以及 tomllib 的其他异常 | 已接受 |
 | ADR-0009 | init 失败时用完整路径写出问题的文件 | 已接受 |
 | ADR-0010 | menu new 失败时用完整路径写出它的文件或文件夹 | 已接受 |
+| ADR-0011 | menu suggest 的换菜提示用相对于数据文件夹的路径写出它的文件 | 已接受 |
 
 ## 12. 修改记录
 
@@ -287,3 +288,5 @@ Troy 于 2026-11-10 批准本文档，接受了 ADR-0001 到 ADR-0007；于 2026
 | 3.0 | 2026-11-13 | Troy 批准。 |
 | 3.1 | 2026-11-14 | 记下 Troy 于 2026-11-14 在 F11 设计里为 C 点选定的做法 1（ADR-0010）。第 6 节：`menu new` 失败时，第一行用完整路径写出它没能写入的文件，或者它没能列出的文件夹 `menus\`。`Problem` 仍然保存相对于数据文件夹的文件，读取函数或检查报告的每个问题仍然写相对路径，所以 `check` 和 `menu show` 仍然把缺少的 `menus` 文件夹写成 `menus`。F13 的 `shop` 仍然只能用完整路径写出它没能写入的文件。第 11 节列出 ADR-0010。 |
 | 4.0 | 2026-11-14 | Troy 批准。 |
+| 4.1 | 2026-11-17 | 记下 Troy 于 2026-11-17 在 F14 设计里为 D 点选定的做法 1（ADR-0011）。第 6 节：`menu suggest` 里告诉你怎样换掉一道菜的那一行，像问题那样用相对于数据文件夹的路径写出这一周的菜单文件。`menu suggest` 保存失败时，按问题保存的样子写出文件；写到它没能删除的临时文件的那一行，用完整路径写出那个文件；这两点第 6 节本来就是这样规定的。第 6 节的其他情况都保持 Troy 批准时的样子。第 5.2 节：`Settings` 一行写上每一餐几道菜，由 F14 在 v0.2 加入。第 11 节列出 ADR-0011。第 5.2 节还按架构师在 F12 设计评审里的计划，改写了 `Ingredient` 一行的说明：购物清单合并相等的食材，对读取函数给出的值来说，相等的食材就是同一个对象，没有改变任何规则。 |
+| 5.0 | 2026-11-17 | Troy 批准。 |
