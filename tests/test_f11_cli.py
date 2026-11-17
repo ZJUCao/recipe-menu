@@ -5,11 +5,13 @@ from pathlib import Path
 from f05_support import make_home
 from f05_texts import no_data_folder
 from f07_changes import broken_settings
+from f07_support import call
 from f09_support import at, made
 from f09_texts import E_SETTINGS, RUN_HELP_COMMANDS, RUN_HELP_OPTIONS, ZH, err, out, stop
 from f11_support import held, menu_text
 from f11_texts import LUNCH_DINNER, SHOW_47, new
 from recipe_menu.datafile import DataFolder
+from v01_commands import V01_COMMANDS
 
 TOO_MANY = 'Unexpected argument "2026-W48". Write "recipe-menu menu {name} [WEEK]".'
 NO_OPTION = '"menu {name}" has no option "--tag". It has no options of its own.'
@@ -46,6 +48,8 @@ LINES = [
     ),
     (("menu", "cook"), ['Unknown command "menu cook".', RUN_HELP_COMMANDS[0]]),
 ]
+# The two lines that name the menu commands run with the commands of v0.1 only.
+V01_LINES = {("menu",), ("menu", "--lang", "zh")}
 HELP_LINES = [
     (("menu", "--help"), ()),
     (("menu", "new", "2026-W48", "--help"), ()),
@@ -57,7 +61,11 @@ HELP_LINES = [
 def _check_lines(home: Path, example: DataFolder) -> None:
     """Checks inputs 1 and 2 of F11-T32: each wrong line gives exit code 2 and two lines."""
     for argv, lines in LINES:
-        assert at(home, example, *argv) == err(2, lines), argv
+        if argv in V01_LINES:
+            full = [*argv, "--data", str(example.root)]
+            assert call(home, full, commands=V01_COMMANDS) == err(2, lines), argv
+        else:
+            assert at(home, example, *argv) == err(2, lines), argv
 
 
 def _check_help(home: Path, example: DataFolder) -> None:

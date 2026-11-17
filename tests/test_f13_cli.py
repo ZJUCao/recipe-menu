@@ -3,7 +3,7 @@
 from pathlib import Path
 
 from f05_support import make_home
-from f05_texts import HELP_EN, HELP_ZH, no_data_folder
+from f05_texts import no_data_folder
 from f07_changes import broken_settings
 from f09_support import at, made
 from f09_texts import E_SETTINGS, RUN_HELP_COMMANDS, RUN_HELP_OPTIONS, ZH, err, out, stop
@@ -22,6 +22,10 @@ def test_f13_t22_cli_reports_the_mistakes_of_the_command_line_before_it_runs_sho
     two_weeks_zh = "多余的参数“2026-W48”。请写成“recipe-menu shop [周]”。"
     tag = '"shop" has no option "--tag". It has no options of its own.'
     tag_zh = "“shop”没有选项“--tag”。它没有自己的选项。"
+    help_en = at(home, None, "--help")
+    help_zh = at(home, None, "--help", "--lang", "zh")
+    assert (help_en[0], help_en[2], help_zh[0], help_zh[2]) == (0, "", 0, "")
+    assert "Commands:" in help_en[1] and "命令：" in help_zh[1]
     lines = [
         (("shop", "2026-W47", "2026-W48"), err(2, [two_weeks, RUN_HELP_COMMANDS[0]])),
         (
@@ -30,8 +34,8 @@ def test_f13_t22_cli_reports_the_mistakes_of_the_command_line_before_it_runs_sho
         ),
         (("shop", "--tag", "x"), err(2, [tag, RUN_HELP_OPTIONS[0]])),
         (("shop", "--tag", "x", "--lang", "zh"), err(2, [tag_zh, RUN_HELP_OPTIONS[1]])),
-        (("shop", "next", "--help"), (0, HELP_EN, "")),
-        (("shop", "2026-W99", "--help", "--lang", "zh"), (0, HELP_ZH, "")),
+        (("shop", "next", "--help"), (0, help_en[1], "")),
+        (("shop", "2026-W99", "--help", "--lang", "zh"), (0, help_zh[1], "")),
     ]
     for argv, expected in lines:
         assert at(home, example_folder, *argv) == expected, argv

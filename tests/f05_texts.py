@@ -1,20 +1,24 @@
 """The texts of F05 that the tests share: the help, the hint lines, and the settings messages.
 
 The help texts, the settings messages, and the hint line about creating the data folder are
-written out in full as literals, so a test does not take them from the code. The two hint lines
+written out in full as literals, so a test does not take them from the code. The form of a key list
+is the one part that the tests check with the list rules of the text module. The two hint lines
 that point to the help after a usage error, and the line that points to check after a stop at an
 error in a data file, are the exception: they are rendered at import from the messages of the
 text module, and a test gets the same lines from here. The module also holds the expected
 results of a call that fails, the places of the settings, and the checks of the settings
-problems. Nothing here calls an interface of F05 when the module is imported.
+problems. The list of keys in an unknown-key problem is checked by its start only, so a feature
+that adds a key to the settings needs no change here. Nothing here calls an interface of F05
+when the module is imported.
 """
 
+import re
 from collections.abc import Sequence
 from pathlib import Path
 
 from recipe_menu.datafile import Problem, Severity
 from recipe_menu.lang import BiText, Lang
-from recipe_menu.text import RUN_CHECK, RUN_HELP_FOR_COMMANDS, RUN_HELP_FOR_OPTIONS
+from recipe_menu.text import RUN_CHECK, RUN_HELP_FOR_COMMANDS, RUN_HELP_FOR_OPTIONS, and_list
 
 EN, ZH = Lang.EN, Lang.ZH
 
@@ -144,7 +148,8 @@ def stopped(where: str, what: str, lang: Lang = EN) -> Result:
 LANGUAGE = BiText("language", "语言")
 MEALS = BiText("meals", "餐次")
 SERVINGS = BiText("servings", "份数")
-KEYS_EN = "language, meals, and servings"
+KEYS_START = ["language", "meals", "servings"]
+KEYS_MARK = "\0keys\0"
 MEALS_EN = "breakfast, lunch, and dinner"
 MEALS_ZH = "breakfast、lunch 和 dinner"
 
@@ -193,10 +198,14 @@ SERVINGS_NOT_A_NUMBER: Msg = (
 
 
 def unknown_key(key: str) -> Msg:
-    """Gives the two texts of ``UNKNOWN_KEY`` in the settings."""
+    """Gives the two texts of ``UNKNOWN_KEY`` in the settings, with the list of keys as a mark.
+
+    ``assert_problems`` replaces the mark by a check of the list: ``and_list`` of one list of keys
+    that starts with ``language``, ``meals``, and ``servings``, in this order.
+    """
     return (
-        f'Unknown key "{key}". The keys are {KEYS_EN}.',
-        f"未知键“{key}”。可用的键：language、meals 和 servings。",
+        f'Unknown key "{key}". The keys are {KEYS_MARK}.',
+        f"未知键“{key}”。可用的键：{KEYS_MARK}。",
     )
 
 
@@ -237,12 +246,39 @@ def entry(place: BiText | None, message: Msg) -> Expected:
     return place, message[0], message[1]
 
 
+def _same_text(got: str, want: str, lang: Lang) -> list[str] | None:
+    """Checks a text against the expected one, whose mark ``KEYS_MARK`` stands for a key list.
+
+    Gives the keys split out of the text, or None when the expected text has no mark.
+    """
+    if KEYS_MARK not in want:
+        assert got == want
+        return None
+    head, tail = want.split(KEYS_MARK)
+    assert got.startswith(head) and got.endswith(tail), (got, want)
+    keys = got[len(head) : len(got) - len(tail)]
+    separator = r", (?:and )?" if lang is EN else r"、| 和 "
+    items = re.split(separator, keys)
+    assert items[: len(KEYS_START)] == KEYS_START, got
+    assert and_list(items).get(lang) == keys, got
+    return items
+
+
 def assert_problems(problems: Sequence[Problem], expected: Sequence[Expected]) -> None:
     """Checks the whole tuple of problems of ``read_settings`` in order.
 
     Every problem must be an error with the file ``settings.toml``, and the place and both texts
-    of each must be the expected ones.
+    of each must be the expected ones. An expected text from ``unknown_key`` holds a list of keys
+    that is checked by its start, as the test plan says.
     """
-    got = [(p.severity, str(p.file), p.place, p.text(EN), p.text(ZH)) for p in problems]
-    want = [(Severity.ERROR, "settings.toml", place, en, zh) for place, en, zh in expected]
-    assert got == want
+    assert len(problems) == len(expected)
+    for index, (problem, (place, en, zh)) in enumerate(zip(problems, expected, strict=True)):
+        assert (problem.severity, str(problem.file), problem.place) == (
+            Severity.ERROR,
+            "settings.toml",
+            place,
+        ), f"problem {index}"
+        keys_en = _same_text(problem.text(EN), en, EN)
+        keys_zh = _same_text(problem.text(ZH), zh, ZH)
+        if KEYS_MARK in en or KEYS_MARK in zh:
+            assert keys_en is not None and keys_en == keys_zh, f"problem {index}"

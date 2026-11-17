@@ -22,7 +22,8 @@ from recipe_menu.commands.shop import SHOP_COMMAND
 from recipe_menu.datafile import DataFolder
 from recipe_menu.lang import BiText, Lang
 from recipe_menu.settings import Meal, Settings
-from recipe_menu.text import Message
+from recipe_menu.text import Message, display_width
+from v01_commands import V01_COMMANDS
 
 BAD_WEEKS = [
     "2026-W99",
@@ -77,8 +78,8 @@ def _check_example(example: DataFolder, home: Path) -> None:
     assert "\r" not in text
     assert [path.name for path in example.shopping.iterdir()] == ["2026-W47.md"]
     assert file.read_bytes() == FILE_47
-    assert call(home, ["--help"]) == (0, HELP_EN, "")
-    assert call(home, ["--help", "--lang", "zh"]) == (0, HELP_ZH, "")
+    assert call(home, ["--help"], commands=V01_COMMANDS) == (0, HELP_EN, "")
+    assert call(home, ["--help", "--lang", "zh"], commands=V01_COMMANDS) == (0, HELP_ZH, "")
     context, stdout, stderr = new_context(Lang.EN, example)
     with pytest.raises(UsageError):
         SHOP_COMMAND.run(context, Arguments(("2026-W99",)))
@@ -87,10 +88,43 @@ def _check_example(example: DataFolder, home: Path) -> None:
     assert file.read_bytes() == FILE_47
 
 
+def _text_column(line: str, text: str) -> int:
+    """Gives the display width of what comes before the text at the end of a help line."""
+    assert line.endswith(text), (line, text)
+    return display_width(line[: len(line) - len(text)])
+
+
+def _check_real_help(home: Path) -> None:
+    """Checks input 6: the line of ``shop`` in the help of the real ``COMMANDS``."""
+    specs = [
+        (
+            ["--help"],
+            "  shop [WEEK] ",
+            "Make the shopping list of a week menu.",
+            "The language of the output. Default: the settings, else English.",
+        ),
+        (
+            ["--help", "--lang", "zh"],
+            "  shop [周] ",
+            "生成一个周菜单的购物清单。",
+            "输出语言。默认：设置里的语言，否则英文。",
+        ),
+    ]
+    for argv, head, text, lang_text in specs:
+        code, shown, error = call(home, argv)
+        assert (code, error) == (0, "")
+        lines = shown.splitlines()
+        shop_line = next((line for line in lines if line.startswith(head)), None)
+        assert shop_line is not None, f"no line of shop starting with {head!r} in {argv}"
+        lang_line = next((line for line in lines if line.startswith("  --lang en|zh")), None)
+        assert lang_line is not None, f"no line of --lang in the help of {argv}"
+        assert _text_column(shop_line, text) == _text_column(lang_line, lang_text)
+
+
 def test_f13_t01_the_shop_command_takes_its_week_and_settings_and_the_help_lists_it(
     example_folder: DataFolder, tmp_path: Path
 ) -> None:
-    """The example of 2.1, then the runs of inputs 1 to 5 and the whole help."""
+    """The example of 2.1, inputs 1 to 5 and the whole help, and input 6, the real help line."""
     home = make_home(tmp_path)
     example = example_folder
     _check_fields()
@@ -122,6 +156,7 @@ def test_f13_t01_the_shop_command_takes_its_week_and_settings_and_the_help_lists
         result = run_command(SHOP_COMMAND, Lang.EN, example, Arguments(("next",)))
         assert result == out(shop_47(file))
         assert file.read_bytes() == FILE_47
+    _check_real_help(home)
 
 
 def _check_wrong_week(folder: DataFolder, value: str) -> None:

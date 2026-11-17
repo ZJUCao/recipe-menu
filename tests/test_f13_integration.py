@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from f05_support import copy_example, make_home, run_module
-from f05_texts import HELP_EN, no_data_folder
+from f05_texts import no_data_folder
 from f07_changes import edit, make_init
 from f07_support import call, snapshot
 from f09_support import at, made
@@ -178,7 +178,10 @@ def test_f13_t27_v0_1_s23_two_runs_change_only_the_list_file_of_the_week(
     before = (snapshot(home), snapshot(cwd))
     assert at(home, None, "shop", "2026-W48") == err(1, [no_menu("2026-W48")])
     assert at(home, None, "shop", "2026-W99") == err(2, [not_a_week("2026-W99")])
-    assert at(home, None, "shop", "--help") == (0, HELP_EN, "")
+    help_en = at(home, None, "--help")
+    assert (help_en[0], help_en[2]) == (0, "")
+    assert "Commands:" in help_en[1]
+    assert at(home, None, "shop", "--help") == (0, help_en[1], "")
     assert at(home, None, "shop", "--tag", "x") == err(2, [tag, RUN_HELP_OPTIONS[0]])
     assert (snapshot(home), snapshot(cwd)) == before
     skip = {"recipe-menu/shopping", "recipe-menu/shopping/2026-W47.md"}
