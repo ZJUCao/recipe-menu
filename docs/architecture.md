@@ -1,8 +1,8 @@
 ---
 troy-doc: "architecture"
 lang: "en"
-version: "5.0"
-updated: "2026-11-17"
+version: "5.1"
+updated: "2026-11-18"
 status: "Approved by Troy on 2026-11-17"
 mirror: "architecture.zh-CN.md"
 ---
@@ -205,7 +205,7 @@ The keys and shapes of every file are those of `docs/prototypes/example-data.md`
 - A warning, such as a missing language, never changes the exit code.
 - An `except` clause names the exceptions it catches, at the place that turns them into a `Problem`, a result, or a `UsageError`. No code catches `Exception` or uses a bare `except`.
 - The parser's English text never reaches the user alone. `datafile` turns the reasons it knows into messages, and shows a general message with the line for any other reason.
-- A problem names its file relative to the data folder, with the system's separator, such as `recipes\mapo-tofu.toml` on Windows. Other messages name a file or a folder by its full path. A failure of `init` is an exception to the first rule, because its data folder is one that you just asked it to create, not one that you use every day (ADR-0009). The first line of the failure names the folder or file that `init` could not create by its full path, `str(context.folder.root / problem.file)`. A failure at the data folder or at a folder above it has the file `Path(".")`, so that line names the data folder. The `Problem` still holds its file relative to the data folder (5.2). The first line of a failure of F11's `menu new` names the file that it could not write, or the folder `menus\` that it could not list, by its full path (ADR-0010). F13's `shop` may also name a file that it could not write by its full path. The line of F14's `menu suggest` that tells you how to swap a dish is an exception to the second rule: it names the week's menu file as a problem names its file, relative to the data folder, such as `menus6-W48.toml` (ADR-0011).
+- A problem names its file relative to the data folder, with the system's separator, such as `recipes\mapo-tofu.toml` on Windows. Other messages name a file or a folder by its full path. A failure of `init` is an exception to the first rule, because its data folder is one that you just asked it to create, not one that you use every day (ADR-0009). The first line of the failure names the folder or file that `init` could not create by its full path, `str(context.folder.root / problem.file)`. A failure at the data folder or at a folder above it has the file `Path(".")`, so that line names the data folder. The `Problem` still holds its file relative to the data folder (5.2). The first line of a failure of F11's `menu new` names the file that it could not write, or the folder `menus\` that it could not list, by its full path (ADR-0010). F13's `shop` may also name a file that it could not write by its full path. The line of F14's `menu suggest` that tells you how to swap a dish is an exception to the second rule: it names the week's menu file as a problem names its file, relative to the data folder, such as `menus\2026-W48.toml` (ADR-0011).
 - A command's output goes to stdout. A message that ends a command with exit code 1 or 2 goes to stderr. The report of `check` is its output, so it goes to stdout with either exit code.
 - `datafile` opens a new file in exclusive mode, so `init` and `menu new` refuse and never overwrite. It writes a file that it replaces, such as a week's shopping list, to a temporary file in the same folder and then moves it over the old one.
 
@@ -290,3 +290,4 @@ Troy accepted ADR-0001 to ADR-0007 on 2026-11-10 by approving this document, ADR
 | 4.0 | 2026-11-14 | Approved by Troy. |
 | 4.1 | 2026-11-17 | Records option 1 of point D, which Troy decided in the F14 design on 2026-11-17 (ADR-0011). Section 6: the line of `menu suggest` that tells you how to swap a dish names the week's menu file relative to the data folder, as a problem names it. A failed save of `menu suggest` names the file as its problem holds it, and its line about a temporary file that it could not remove names that file by its full path, both as section 6 already said. Every other case of section 6 stays as Troy approved it. Section 5.2: the `Settings` row names the number of dishes of each meal, which F14 adds in v0.2. Section 11 lists ADR-0011. Section 5.2 also rewords the note of the `Ingredient` row, as the Architect planned in the F12 design review: the shopping list merges equal ingredients, which for the values that the readers give are the same object, and no rule changes. |
 | 5.0 | 2026-11-17 | Approved by Troy. |
+| 5.1 | 2026-11-18 | Section 6: the example in the sentence about the line of `menu suggest` that tells you how to swap a dish reads `menus\2026-W48.toml` again, as ADR-0011 and the F14 design give it. Version 4.1 held a control character there in place of `\202`. No rule changes. Troy let the Product Manager merge this fix without Troy's review. |
