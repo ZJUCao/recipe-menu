@@ -12,7 +12,12 @@ from recipe_menu.datafile import (
 )
 from recipe_menu.lang import Lang
 from recipe_menu.settings._meal import Meal
+from recipe_menu.settings._settings import MAX_DISHES, MIN_DISHES
 from recipe_menu.settings.messages import (
+    DISHES,
+    DISHES_NOT_1_TO_10,
+    DISHES_NOT_A_TABLE,
+    DISHES_OF,
     LANGUAGE,
     LANGUAGE_NOT_EN_OR_ZH,
     MEAL_N,
@@ -111,3 +116,53 @@ def read_servings_key(table: Mapping[str, object], report: Report) -> int | None
     if "servings" not in table:
         return None
     return read_servings(table["servings"], SERVINGS.to_bitext(), report)
+
+
+def _read_dishes_of(key: str, value: object, report: Report) -> int | None:
+    """Reads the number of dishes of one key of ``dishes``.
+
+    Args:
+        key: The key as the file writes it.
+        value: The value of the key.
+        report: Where the problems go.
+
+    Returns:
+        The number, or ``None`` after a problem.
+    """
+    if key not in Meal:
+        report.add(
+            DISHES.to_bitext(), UNKNOWN_MEAL, meal=key, meals=and_list(meal.value for meal in Meal)
+        )
+        return None
+    place = DISHES_OF.to_bitext(meal=Meal(key).label)
+    if (
+        isinstance(value, bool)
+        or not isinstance(value, int)
+        or not MIN_DISHES <= value <= MAX_DISHES
+    ):
+        report.add(place, DISHES_NOT_1_TO_10)
+        return None
+    return value
+
+
+def read_dishes(table: Mapping[str, object], report: Report) -> tuple[int, int, int] | None:
+    """Reads the ``dishes`` of the file.
+
+    Args:
+        table: The table of the file.
+        report: Where the problems go.
+
+    Returns:
+        The number of dishes of each meal in the order of ``Meal``, 1 for a meal that the table
+        leaves out. ``None`` when the key is missing. The numbers are not used when a problem
+        was reported.
+    """
+    if "dishes" not in table:
+        return None
+    value = table["dishes"]
+    if not isinstance(value, dict):
+        report.add(DISHES.to_bitext(), DISHES_NOT_A_TABLE)
+        return None
+    found = {key: _read_dishes_of(key, number, report) for key, number in value.items()}
+    breakfast, lunch, dinner = (found.get(meal.value) or 1 for meal in Meal)
+    return breakfast, lunch, dinner

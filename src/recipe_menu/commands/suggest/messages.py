@@ -1,4 +1,4 @@
-r"""The messages of ``suggest``: the help line, the argument name, and the lines of the command.
+"""The messages of ``suggest``: the help line, the argument name, and the lines of the command.
 
 Every message is internal to the module. The output of ``recipe-menu menu suggest`` is made of
 them, of ``NOT_A_WEEK`` and ``NO_MENU`` of ``menus``, and of the problems that the readers and

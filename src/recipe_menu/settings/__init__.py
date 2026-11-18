@@ -1,4 +1,4 @@
-"""The settings of a data folder: the language, the meals of each day, and the servings."""
+"""The settings of a data folder: language, meals of each day, servings, and dishes of each meal."""
 
 from recipe_menu.settings._meal import Meal
 from recipe_menu.settings._read import read_settings

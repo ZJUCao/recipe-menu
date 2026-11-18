@@ -228,6 +228,27 @@ def _parse(relative: Path, text: str) -> dict[str, object] | Problem:
         return Problem.error(relative, _line_place(line), NESTED_TOO_DEEPLY)
 
 
+def read_decoded(relative: Path, path: Path) -> str | Problem:
+    """Takes steps 1 and 2 of ``read_toml``: reads the bytes of a file and decodes them.
+
+    Args:
+        relative: The file, relative to the data folder.
+        path: The file to read.
+
+    Returns:
+        The text, decoded with the ``utf-8-sig`` codec and strict errors, or the problem of an
+        ``OSError`` or of a ``UnicodeDecodeError``.
+    """
+    try:
+        data = path.read_bytes()
+    except OSError as error:
+        return _read_failure(relative, path, error)
+    try:
+        return data.decode("utf-8-sig")
+    except UnicodeDecodeError as error:
+        return _decode_failure(relative, error)
+
+
 def read_toml(folder: DataFolder, path: Path) -> dict[str, object] | Problem:
     r"""Reads one data file as TOML 1.0.
 
@@ -284,12 +305,7 @@ def read_toml(folder: DataFolder, path: Path) -> dict[str, object] | Problem:
             It is checked before the file is read.
     """
     relative = folder.relative(path)
-    try:
-        data = path.read_bytes()
-    except OSError as error:
-        return _read_failure(relative, path, error)
-    try:
-        text = data.decode("utf-8-sig")
-    except UnicodeDecodeError as error:
-        return _decode_failure(relative, error)
+    text = read_decoded(relative, path)
+    if isinstance(text, Problem):
+        return text
     return _parse(relative, text)
