@@ -6,6 +6,13 @@ from recipe_menu.datafile import MAX_SERVINGS, MIN_SERVINGS
 from recipe_menu.lang import Lang
 from recipe_menu.settings._meal import Meal
 
+# The fewest and the most dishes of one meal.
+MIN_DISHES = 1
+MAX_DISHES = 10
+
+# The place of each meal in ``Settings.dishes``, which is the order of ``Meal``.
+_MEAL_POSITIONS = {meal: position for position, meal in enumerate(Meal)}
+
 
 def _check_meals(meals: object) -> None:
     """Checks the meals of a ``Settings``.
@@ -25,6 +32,28 @@ def _check_meals(meals: object) -> None:
     positions = [order.index(meal) for meal in meals]
     if positions != sorted(set(positions)):
         raise ValueError("meals must hold each meal once, in the order of Meal")
+
+
+def _check_dishes(dishes: object) -> None:
+    """Checks the dishes of a ``Settings``.
+
+    Args:
+        dishes: The value of the field ``dishes``.
+
+    Raises:
+        TypeError: ``dishes`` is not a tuple, or it holds an item that is not an ``int``, or
+            that is a ``bool``.
+        ValueError: ``dishes`` does not hold exactly three items, or it holds a number less than
+            1 or more than 10.
+    """
+    if not isinstance(dishes, tuple) or any(
+        isinstance(number, bool) or not isinstance(number, int) for number in dishes
+    ):
+        raise TypeError("dishes must be a tuple of int")
+    if len(dishes) != len(Meal):
+        raise ValueError("dishes must hold exactly three numbers")
+    if any(not MIN_DISHES <= number <= MAX_DISHES for number in dishes):
+        raise ValueError(f"dishes must be from {MIN_DISHES} to {MAX_DISHES}")
 
 
 @dataclass(frozen=True, slots=True)
@@ -50,6 +79,10 @@ class Settings:
         ValueError: ``meals`` is empty, holds a meal twice, or is not in the order of ``Meal``.
         TypeError: ``servings`` is not an ``int``, or it is a ``bool``.
         ValueError: ``servings`` is less than 1 or more than 100.
+        TypeError: ``dishes`` is not a tuple, or it holds an item that is not an ``int``, or
+            that is a ``bool``.
+        ValueError: ``dishes`` does not hold exactly three items, or it holds a number less than
+            1 or more than 10.
     """
 
     language: Lang | None = None
@@ -62,7 +95,7 @@ class Settings:
 
         Raises:
             TypeError: A field has the wrong type.
-            ValueError: ``meals`` or ``servings`` has a wrong value.
+            ValueError: ``meals``, ``servings``, or ``dishes`` has a wrong value.
         """
         if self.language is not None and not isinstance(self.language, Lang):
             raise TypeError("language must be a Lang or None")
@@ -71,6 +104,7 @@ class Settings:
             raise TypeError("servings must be an int")
         if not MIN_SERVINGS <= self.servings <= MAX_SERVINGS:
             raise ValueError(f"servings must be from {MIN_SERVINGS} to {MAX_SERVINGS}")
+        _check_dishes(self.dishes)
 
     def dishes_for(self, meal: Meal) -> int:
         """Gives the number of dishes of a meal.
@@ -79,6 +113,6 @@ class Settings:
             meal: Any ``Meal``, also one that ``meals`` does not name.
 
         Returns:
-            ``dishes[list(Meal).index(meal)]``. The mock gives 1.
+            The item of ``dishes`` at the place of ``meal`` in the order of ``Meal``.
         """
-        return 1
+        return self.dishes[_MEAL_POSITIONS[meal]]

@@ -67,7 +67,7 @@ def main(
             commands have the same words, and no one-word command has the first word of a
             two-word command.
         random: The generator of the command. ``None`` gives ``Random()``, which seeds itself
-            from the system, so each run chooses anew. The mock does not pass it on yet.
+            from the system, so each run chooses anew. ``main`` passes it on in ``Context.random``.
 
     Returns:
         The exit code. It is 0 for the help, the version, or a command that worked. It is 1
@@ -159,6 +159,7 @@ def main(
     """
     selected = tuple(COMMANDS if commands is None else commands)
     check_commands(selected)
+    generator = Random() if random is None else random  # noqa: S311 - a recipe choice, no security
     try:
         outside = _Outside(
             os.environ if environ is None else environ,
@@ -167,6 +168,7 @@ def main(
             _stream(stdout, sys.stdout),
             _stream(stderr, sys.stderr),
             selected,
+            generator,
         )
         return _run(sys.argv[1:] if argv is None else argv, outside)
     except KeyboardInterrupt:
@@ -184,6 +186,7 @@ class _Outside:
         out: The output stream.
         err: The error stream.
         commands: The commands, in the order of the help.
+        random: The random generator of the command.
     """
 
     environ: Mapping[str, str]
@@ -192,6 +195,7 @@ class _Outside:
     out: TextIO
     err: TextIO
     commands: tuple[Command, ...]
+    random: Random
 
 
 @dataclass(frozen=True, slots=True)
@@ -378,7 +382,9 @@ def _execute(command: Command, arguments: Arguments, outside: _Outside, start: _
     """
     lang = start.lang
     settings = Settings() if start.settings is None else start.settings
-    context = Context(lang, start.folder, settings, outside.out, outside.err, outside.today)
+    context = Context(
+        lang, start.folder, settings, outside.out, outside.err, outside.today, outside.random
+    )
     if command.folder is not FolderUse.CREATE and not start.present:
         folder = str(start.folder.root)
         _write_lines(
