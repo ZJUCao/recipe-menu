@@ -4,7 +4,7 @@ Feature: F05. A PowerShell session in Windows Terminal. The data folder holds th
 
 ## Help in English
 
-In v0.1 the help lists the v0.1 commands. v0.2 adds `menu suggest`, `add`, and `edit`.
+The help lists the commands of the accepted features: those of v0.1 and `menu suggest`. F15 adds `add`, and F16 adds `edit`. In v0.1 the help had no `menu suggest` line, and its second column started after 21 columns.
 
 ```text
 PS> recipe-menu --help
@@ -13,20 +13,21 @@ Usage: recipe-menu COMMAND [ARGUMENTS] [--lang en|zh] [--data FOLDER]
 Keep your recipes, plan a week's menu, and make its shopping list.
 
 Commands:
-  init               Create the data folder with example data.
-  check              Check every data file for mistakes.
-  list               List the recipes.
-  show ID            Show one recipe.
-  search WORD...     Find recipes by name, ingredient, or tag.
-  menu new [WEEK]    Create an empty week menu.
-  menu show [WEEK]   Show a week menu.
-  shop [WEEK]        Make the shopping list of a week menu.
+  init                  Create the data folder with example data.
+  check                 Check every data file for mistakes.
+  list                  List the recipes.
+  show ID               Show one recipe.
+  search WORD...        Find recipes by name, ingredient, or tag.
+  menu new [WEEK]       Create an empty week menu.
+  menu show [WEEK]      Show a week menu.
+  menu suggest [WEEK]   Fill the empty meals of a week menu.
+  shop [WEEK]           Make the shopping list of a week menu.
 
 Options:
-  --lang en|zh       The language of the output. Default: the settings, else English.
-  --data FOLDER      The data folder. Default: RECIPE_MENU_DATA, else ~/recipe-menu.
-  --version          Show the version.
-  --help             Show this help.
+  --lang en|zh          The language of the output. Default: the settings, else English.
+  --data FOLDER         The data folder. Default: RECIPE_MENU_DATA, else ~/recipe-menu.
+  --version             Show the version.
+  --help                Show this help.
 
 WEEK is an ISO week such as 2026-W47, "this", or "next". Default: this.
 
@@ -43,20 +44,21 @@ PS> recipe-menu --help --lang zh
 保存菜谱，排一周的菜单，并生成它的购物清单。
 
 命令：
-  init               创建数据文件夹和示例数据。
-  check              检查每个数据文件有没有错误。
-  list               列出菜谱。
-  show ID            查看一个菜谱。
-  search 词...       按名称、食材或标签找菜谱。
-  menu new [周]      创建一个空的周菜单。
-  menu show [周]     查看一个周菜单。
-  shop [周]          生成一个周菜单的购物清单。
+  init                  创建数据文件夹和示例数据。
+  check                 检查每个数据文件有没有错误。
+  list                  列出菜谱。
+  show ID               查看一个菜谱。
+  search 词...          按名称、食材或标签找菜谱。
+  menu new [周]         创建一个空的周菜单。
+  menu show [周]        查看一个周菜单。
+  menu suggest [周]     给一个周菜单的空餐填上菜。
+  shop [周]             生成一个周菜单的购物清单。
 
 选项：
-  --lang en|zh       输出语言。默认：设置里的语言，否则英文。
-  --data 文件夹      数据文件夹。默认：RECIPE_MENU_DATA，否则 ~/recipe-menu。
-  --version          显示版本。
-  --help             显示这份帮助。
+  --lang en|zh          输出语言。默认：设置里的语言，否则英文。
+  --data 文件夹         数据文件夹。默认：RECIPE_MENU_DATA，否则 ~/recipe-menu。
+  --version             显示版本。
+  --help                显示这份帮助。
 
 “周”是 ISO 周，比如 2026-W47，也可以是 this（本周）或 next（下周）。默认：本周。
 ```

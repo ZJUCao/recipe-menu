@@ -1,8 +1,8 @@
 ---
 troy-doc: "requirements"
 lang: "zh-CN"
-version: "2.2"
-updated: "2026-11-16"
+version: "2.3"
+updated: "2026-11-19"
 status: "Troy 已于 2026-11-15 批准"
 mirror-of: "requirements.md"
 ---
@@ -127,7 +127,7 @@ mirror-of: "requirements.md"
 | F11 | 创建和查看周菜单 | F05 | F02、F06 | v0.1 | 在 Troy 的设备上可用 |
 | F12 | 生成购物清单 | 无 | F01、F03、F04、F06 | v0.1 | 在 Troy 的设备上可用 |
 | F13 | 购物清单命令 | F05 | F02、F12 | v0.1 | 在 Troy 的设备上可用 |
-| F14 | 推荐周菜单 | F05 | F06、F11 | v0.2 | 未开始 |
+| F14 | 推荐周菜单 | F05 | F06、F11 | v0.2 | 在 Troy 的电脑上真跑过 |
 | F15 | 添加菜谱 | F05 | F03、F04、F07 | v0.2 | 未开始 |
 | F16 | 编辑菜谱 | F05 | F07 | v0.2 | 未开始 |
 
@@ -287,3 +287,4 @@ flowchart LR
 | 2.0 | 2026-11-15 | Troy 批准。 |
 | 2.1 | 2026-11-16 | F13 在 Troy 的电脑上真跑过。 |
 | 2.2 | 2026-11-16 | Troy 在自己的设备上验收了 v0.1.0：F01 到 F13 在 Troy 的设备上可用。 |
+| 2.3 | 2026-11-19 | F14 在 Troy 的电脑上真跑过。F05 原型的两段帮助列出了 `menu suggest`，这是 Troy 在 F14 设计里的决定。 |
