@@ -1,5 +1,6 @@
 """What a command gets from the outside world."""
 
+import io
 from dataclasses import dataclass, field
 from datetime import date
 from random import Random
@@ -15,7 +16,7 @@ class Context:
     """What a command gets from the outside world through ``cli``.
 
     ``cli`` builds it, and a test can build one with fixed values. Two contexts are equal when
-    their seven fields are equal, and the streams and the generator compare as objects. A
+    their eight fields are equal, and the streams and the generator compare as objects. A
     ``Context`` is hashable.
 
     Attributes:
@@ -32,6 +33,9 @@ class Context:
         random: The generator that a command draws its random choices from. ``cli`` passes the
             generator that ``main`` got or made. Without it, a new ``Random(0)`` for each
             context, so a test that builds a context gets the same choices every time.
+        input: The stream that a command reads lines from. Open. ``cli`` passes the stream that
+            ``main`` got, else ``sys.stdin``. Without it, a new empty ``io.StringIO`` for each
+            context, so a command that reads finds the end of the input at once.
     """
 
     lang: Lang
@@ -41,3 +45,4 @@ class Context:
     err: TextIO
     today: date
     random: Random = field(default_factory=lambda: Random(0))  # noqa: S311 - a fixed seed, no security
+    input: TextIO = field(default_factory=io.StringIO)

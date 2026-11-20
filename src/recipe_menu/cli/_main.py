@@ -47,6 +47,7 @@ def main(
     stderr: TextIO | None = None,
     commands: Sequence[Command] | None = None,
     random: Random | None = None,
+    stdin: TextIO | None = None,
 ) -> int:
     r"""Runs the ``recipe-menu`` command line and gives its exit code.
 
@@ -68,6 +69,8 @@ def main(
             two-word command.
         random: The generator of the command. ``None`` gives ``Random()``, which seeds itself
             from the system, so each run chooses anew. ``main`` passes it on in ``Context.random``.
+        stdin: The input stream of the command. ``None`` gives ``sys.stdin``, after
+            ``use_utf8_input``. The mock accepts it and does not pass it on.
 
     Returns:
         The exit code. It is 0 for the help, the version, or a command that worked. It is 1

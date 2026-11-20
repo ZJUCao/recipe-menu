@@ -3,6 +3,7 @@
 from typing import Final
 
 from recipe_menu.app import Command
+from recipe_menu.commands.add import ADD_COMMAND
 from recipe_menu.commands.browse import LIST_COMMAND, SHOW_COMMAND
 from recipe_menu.commands.check import CHECK_COMMAND
 from recipe_menu.commands.init import INIT_COMMAND
@@ -19,6 +20,7 @@ COMMANDS: Final[tuple[Command, ...]] = (
     LIST_COMMAND,
     SHOW_COMMAND,
     SEARCH_COMMAND,
+    ADD_COMMAND,
     MENU_NEW_COMMAND,
     MENU_SHOW_COMMAND,
     MENU_SUGGEST_COMMAND,
