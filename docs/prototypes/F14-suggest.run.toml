@@ -1,0 +1,67 @@
+# Run file of F14-suggest.md: how the real run sets up each section.
+# The prototype: "This session assumes a data folder with 40 recipes, 16 of them with the tag
+# 快手 (quick). The settings give each meal 1 dish." The example data in `example-data.md` holds 7
+# recipes, 3 of them with the tag 快手 and 1 with the tag 辣 (spicy), and settings with lunch and
+# dinner and no `dishes`, so each meal gets 1 dish. `docs/prototypes/data/suggest` adds the 33
+# recipes of the suggest folder of the v0.2 test plan: 13 with the tag 快手, 2 with the tag 辣, and
+# 18 with the tag 家常.
+
+[paths]
+'C:\Users\Troy' = '<home>'
+
+[environment]
+unset = ["RECIPE_MENU_DATA"]
+
+[start]
+copy = [
+  { from = "tests/data/example", to = '<home>\recipe-menu' },
+  { from = "docs/prototypes/data/suggest", to = '<home>\recipe-menu' },
+]
+mkdir = ['<home>\recipe-menu\shopping']
+
+[sections."Fill an empty week"]
+
+# "Troy empties Wednesday dinner in the file and runs `suggest` again. The other 13 meals stay as
+# they are." The first fill draws its recipes at random, so the file is written as such a week: 13
+# meals that each hold a recipe with the tag 快手, and Wednesday dinner empty.
+[sections."Swap one dish"]
+start = "previous"
+write = [{ file = '<home>\recipe-menu\menus\2026-W48.toml', text = '''
+# 2026-W48: 23 to 29 November 2026
+# A dish is a recipe ID, such as "tomato-egg",
+# or a recipe ID with servings, such as { recipe = "tomato-egg", servings = 4 }.
+week = "2026-W48"
+
+[monday]
+lunch = ["choy-sum"]
+dinner = ["quick-01"]
+
+[tuesday]
+lunch = ["quick-02"]
+dinner = ["quick-03"]
+
+[wednesday]
+lunch = ["quick-04"]
+dinner = []
+
+[thursday]
+lunch = ["quick-05"]
+dinner = ["quick-06"]
+
+[friday]
+lunch = ["quick-07"]
+dinner = ["quick-08"]
+
+[saturday]
+lunch = ["quick-09"]
+dinner = ["quick-10"]
+
+[sunday]
+lunch = ["quick-11"]
+dinner = ["quick-12"]
+''' }]
+
+# The command names the week 2026-W49, so it has a menu file with 14 empty meals, as
+# `menu new` makes it.
+[sections."Not enough recipes"]
+start = { copy = [{ from = "tests/data/example", to = '<home>\recipe-menu' }, { from = "docs/prototypes/data/suggest", to = '<home>\recipe-menu' }], mkdir = ['<home>\recipe-menu\shopping'], setup = ["recipe-menu menu new 2026-W49"] }

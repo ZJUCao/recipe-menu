@@ -1,0 +1,9 @@
+name = { zh = "快手菜 13", en = "Quick dish 13" }
+servings = 2
+tags = ["快手"]
+
+ingredients = [{ item = "番茄", amount = "300 g" }]
+
+[steps]
+zh = ["番茄切块。"]
+en = ["Cut the tomatoes."]
