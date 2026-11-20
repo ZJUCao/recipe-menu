@@ -98,13 +98,19 @@ def _text_column(line: str, text: str) -> int:
 
 
 def _check_real_help(home: Path, argv: list[str], spec: tuple) -> None:
-    """Checks the two lines of the menu commands in the help of the real ``COMMANDS``."""
+    """Checks the two lines of the menu commands in the help of the real ``COMMANDS``.
+
+    The line of ``menu new`` is found by its start after the line of ``search``.
+    """
     search, (new_head, new_text), (show_head, show_text), lang_text = spec
     code, text, error = call(home, argv)
     assert (code, error) == (0, "")
     lines = text.split("\n")
     first = next(index for index, line in enumerate(lines) if line.startswith(search))
-    new_line, show_line = lines[first + 1], lines[first + 2]
+    found = next(
+        index for index, line in enumerate(lines) if index > first and line.startswith(new_head)
+    )
+    new_line, show_line = lines[found], lines[found + 1]
     assert new_line.startswith(new_head)
     assert show_line.startswith(show_head)
     lang_line = next(line for line in lines if line.startswith("  --lang en|zh"))
