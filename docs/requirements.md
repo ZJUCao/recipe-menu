@@ -1,8 +1,8 @@
 ---
 troy-doc: "requirements"
 lang: "en"
-version: "2.3"
-updated: "2026-11-19"
+version: "2.4"
+updated: "2026-11-21"
 status: "Approved by Troy on 2026-11-15"
 mirror: "requirements.zh-CN.md"
 ---
@@ -128,7 +128,7 @@ Each prototype is a PowerShell session in Windows Terminal that runs the same co
 | F12 | Build the shopping list | None | F01, F03, F04, F06 | v0.1 | Usable on Troy's devices |
 | F13 | Shopping list command | F05 | F02, F12 | v0.1 | Usable on Troy's devices |
 | F14 | Suggest a week menu | F05 | F06, F11 | v0.2 | Ran for real on Troy's PC |
-| F15 | Add a recipe | F05 | F03, F04, F07 | v0.2 | Not started |
+| F15 | Add a recipe | F05 | F03, F04, F07 | v0.2 | Passes tests on main |
 | F16 | Edit a recipe | F05 | F07 | v0.2 | Not started |
 
 Every command depends hard on F05, because F05 provides the `recipe-menu` command that runs it. The other dependencies are soft: the feature can be built against the other feature's mock.
@@ -288,3 +288,4 @@ Topological order: F01, F02, F03, F04, F05, F06, F07, F08, F09, F10, F11, F12, F
 | 2.1 | 2026-11-16 | F13 ran for real on Troy's PC. |
 | 2.2 | 2026-11-16 | Troy accepted v0.1.0 on Troy's devices: F01 to F13 are usable on Troy's devices. |
 | 2.3 | 2026-11-19 | F14 ran for real on Troy's PC. The two helps of the F05 prototype list `menu suggest`, as Troy decided in the F14 design. |
+| 2.4 | 2026-11-21 | F15 passes tests on main. Both sessions of its prototype read Troy's answers from the console, so the real run skips them; Troy types them in Windows Terminal in the v0.2 release test. The two helps of the F05 prototype list `add` after `search`, as Troy decided in the F15 design. |
