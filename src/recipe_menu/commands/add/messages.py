@@ -56,10 +56,8 @@ NOT_AN_ID: Final[Message] = Message(
     '"{id}" cannot be a recipe ID. An ID has only the small letters a to z, digits, '
     'and "-", and starts with a letter or a digit, such as "tomato-egg". Windows '
     'device names, such as "con", are not IDs.',
-    "“{id}”不能用作菜谱 ID。ID 只能由小写字母 a 到"
-    " z、数字和“-”组成，并以字母或数字开头，比如“tomat"
-    "o-egg”。“con”这样的 Windows 设备名不能用"
-    "作 ID。",
+    "“{id}”不能用作菜谱 ID。ID 只能由小写字母 a 到 z、数字和“-”组成，"
+    "并以字母或数字开头，比如“tomato-egg”。“con”这样的 Windows 设备名不能用作 ID。",
 )
 ID_EXISTS: Final[Message] = Message(
     'The recipe {id} already exists. Enter another ID, or run "recipe-menu edit {id}".',
@@ -88,10 +86,8 @@ UNKNOWN_INGREDIENT: Final[Message] = Message(
 )
 # The four amount messages, with the texts of ``read_recipe``.
 AMOUNT_NOT_A_NUMBER: Final[Message] = Message(
-    'The amount "{amount}" must sta'
-    "rt with a number of at most 15"
-    " digits, such as 300 or 1.5, o"
-    'r be "适量" or "to taste".',
+    'The amount "{amount}" must start with a number of at most 15 digits, such as 300 or 1.5, '
+    'or be "适量" or "to taste".',
     "数量“{amount}”必须以不超过 15 位的数字开头，比如 300 或 1.5，或者写成“适量”或“to taste”。",
 )
 AMOUNT_UNKNOWN_UNIT: Final[Message] = Message(

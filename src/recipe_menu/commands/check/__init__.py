@@ -1,4 +1,8 @@
-"""The ``check`` command: reads every data file and reports its errors and warnings."""
+"""The ``check`` command: reads every data file and reports its errors and warnings.
+
+It also checks one recipe, for ``add`` and ``edit`` to reuse, with ``check_recipe`` and
+``problem_block``.
+"""
 
 from typing import Final
 
