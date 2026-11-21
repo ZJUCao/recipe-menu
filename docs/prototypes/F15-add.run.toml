@@ -1,0 +1,21 @@
+# Run file of F15-add.md: how the real run sets up each section.
+# The prototype: "A PowerShell session in Windows Terminal. The data folder holds the example data
+# in `example-data.md`. Troy's answers follow each colon." `add` reads each answer from the
+# console, and the real run gives the program no input, so both sections are skipped here. The
+# F15 tests run each section at `main` with the same answers through a pipe (F15-T08 and
+# F15-T09), and Troy types them in Windows Terminal in v0.2-S18.
+
+[paths]
+'C:\Users\Troy' = '<home>'
+
+[environment]
+unset = ["RECIPE_MENU_DATA"]
+
+[start]
+copy = [{ from = "tests/data/example", to = '<home>\recipe-menu' }]
+
+[sections."In Chinese, with one wrong answer"]
+skip = [{ reason = "add reads Troy's answers from the console; F15-T08 runs this session with the same answers at main, and v0.2-S18 types it in Windows Terminal" }]
+
+[sections."An ID that exists"]
+skip = [{ reason = "add reads Troy's answers from the console; F15-T09 runs this session with the same answers at main, and v0.2-S18 types it in Windows Terminal" }]

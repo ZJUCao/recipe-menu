@@ -4,7 +4,7 @@ Feature: F05. A PowerShell session in Windows Terminal. The data folder holds th
 
 ## Help in English
 
-The help lists the commands of the accepted features: those of v0.1 and `menu suggest`. F15 adds `add`, and F16 adds `edit`. In v0.1 the help had no `menu suggest` line, and its second column started after 21 columns.
+The help lists the commands of the accepted features: those of v0.1, `add`, and `menu suggest`. F16 adds `edit`. In v0.1 the help had no `add` or `menu suggest` line, and its second column started after 21 columns.
 
 ```text
 PS> recipe-menu --help
@@ -18,6 +18,7 @@ Commands:
   list                  List the recipes.
   show ID               Show one recipe.
   search WORD...        Find recipes by name, ingredient, or tag.
+  add                   Add a recipe by answering questions.
   menu new [WEEK]       Create an empty week menu.
   menu show [WEEK]      Show a week menu.
   menu suggest [WEEK]   Fill the empty meals of a week menu.
@@ -49,6 +50,7 @@ PS> recipe-menu --help --lang zh
   list                  列出菜谱。
   show ID               查看一个菜谱。
   search 词...          按名称、食材或标签找菜谱。
+  add                   回答问题，添加一个菜谱。
   menu new [周]         创建一个空的周菜单。
   menu show [周]        查看一个周菜单。
   menu suggest [周]     给一个周菜单的空餐填上菜。
