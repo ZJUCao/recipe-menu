@@ -1,7 +1,8 @@
 """The run function of the ``check`` command."""
 
-from recipe_menu.app import Arguments, Context, first_error, problem_lines
+from recipe_menu.app import Arguments, Context, first_error
 from recipe_menu.catalog import read_catalog, read_pantry
+from recipe_menu.commands.check._recipe import problem_block
 from recipe_menu.commands.check.messages import (
     CHECKED,
     ERRORS_HEADING,
@@ -86,11 +87,7 @@ def _block(problems: list[Problem], heading: Plural, lang: Lang) -> list[str]:
         The lines of the block.
     """
     count = len(problems)
-    lines = [heading.pick(count).render(lang, count=count)]
-    for problem in problems:
-        where, what = problem_lines(problem, lang)
-        lines.extend((f"  {where}", f"    {what}"))
-    return lines
+    return [heading.pick(count).render(lang, count=count), *problem_block(problems, lang)]
 
 
 def _report_lines(recipes: int, weeks: int, problems: list[Problem], lang: Lang) -> list[str]:

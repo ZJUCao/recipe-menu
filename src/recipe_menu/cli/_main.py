@@ -34,7 +34,7 @@ from recipe_menu.cli.messages import NO_DATA_FOLDER, RUN_INIT, VERSION_LINE
 from recipe_menu.datafile import DataFolder, Problem
 from recipe_menu.lang import Lang
 from recipe_menu.settings import Settings, read_settings
-from recipe_menu.text import choose_lang, use_utf8
+from recipe_menu.text import choose_lang, use_utf8, use_utf8_input
 
 
 def main(
@@ -70,7 +70,7 @@ def main(
         random: The generator of the command. ``None`` gives ``Random()``, which seeds itself
             from the system, so each run chooses anew. ``main`` passes it on in ``Context.random``.
         stdin: The input stream of the command. ``None`` gives ``sys.stdin``, after
-            ``use_utf8_input``. The mock accepts it and does not pass it on.
+            ``use_utf8_input``. ``main`` passes it on in ``Context.input``.
 
     Returns:
         The exit code. It is 0 for the help, the version, or a command that worked. It is 1
@@ -172,6 +172,7 @@ def main(
             _stream(stderr, sys.stderr),
             selected,
             generator,
+            _input_stream(stdin),
         )
         return _run(sys.argv[1:] if argv is None else argv, outside)
     except KeyboardInterrupt:
@@ -190,6 +191,7 @@ class _Outside:
         err: The error stream.
         commands: The commands, in the order of the help.
         random: The random generator of the command.
+        input: The input stream of the command.
     """
 
     environ: Mapping[str, str]
@@ -199,6 +201,7 @@ class _Outside:
     err: TextIO
     commands: tuple[Command, ...]
     random: Random
+    input: TextIO
 
 
 @dataclass(frozen=True, slots=True)
@@ -255,6 +258,21 @@ def _stream(stream: TextIO | None, console: TextIO) -> TextIO:
         return stream
     use_utf8(console)
     return console
+
+
+def _input_stream(stdin: TextIO | None) -> TextIO:
+    """Picks the input stream, and makes the console read UTF-8.
+
+    Args:
+        stdin: The stream that ``main`` got, or ``None``.
+
+    Returns:
+        ``stdin``, or ``sys.stdin`` after ``use_utf8_input``.
+    """
+    if stdin is not None:
+        return stdin
+    use_utf8_input(sys.stdin)
+    return sys.stdin
 
 
 def _write_lines(stream: TextIO, lines: Sequence[str]) -> None:
@@ -386,7 +404,14 @@ def _execute(command: Command, arguments: Arguments, outside: _Outside, start: _
     lang = start.lang
     settings = Settings() if start.settings is None else start.settings
     context = Context(
-        lang, start.folder, settings, outside.out, outside.err, outside.today, outside.random
+        lang,
+        start.folder,
+        settings,
+        outside.out,
+        outside.err,
+        outside.today,
+        outside.random,
+        outside.input,
     )
     if command.folder is not FolderUse.CREATE and not start.present:
         folder = str(start.folder.root)

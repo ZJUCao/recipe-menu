@@ -1,4 +1,4 @@
-"""Messages, lists, plurals, width, tables, and UTF-8 output, in two languages."""
+"""Messages, lists, plurals, width, tables, and UTF-8 output and input, in two languages."""
 
 from recipe_menu.text._lang import choose_lang
 from recipe_menu.text._lists import and_list, comma_list
