@@ -93,10 +93,18 @@ def _check_flush(source: DataFolder, tmp_path: Path) -> None:
     assert folder.recipe_file("new-dish").read_bytes() == BASE_FILE.encode("utf-8")
 
 
+def _check_cr_ends(home: Path, source: DataFolder, tmp_path: Path) -> None:
+    """Line 8: on a stream that keeps its line ends, each echo keeps its CR, the answer drops it."""
+    folder = fresh(source, tmp_path, "cr-ends")
+    exists = id_exists("tomato-egg")[0]
+    expected = ID_PROMPT[0] + "tomato-egg\r\n" + exists + "\n" + ID_PROMPT[0] + "\r\n"
+    assert add(home, folder, io.StringIO("tomato-egg\r\n\r")) == (0, expected, "")
+
+
 def test_f15_t17_add_writes_a_prompt_flushes_it_and_reads_one_line(
     example_folder: DataFolder, tmp_path: Path
 ) -> None:
-    """Seven lines: the end after each answer, Chinese, the terminal, and the flush record."""
+    """Eight lines: the end after each answer, Chinese, the terminal, the flush, and CR ends."""
     home = make_home(tmp_path)
     source = pristine(example_folder, tmp_path)
     first = fresh(source, tmp_path, "first")
@@ -111,6 +119,7 @@ def test_f15_t17_add_writes_a_prompt_flushes_it_and_reads_one_line(
     assert prompt == "标签，用逗号分隔："
     _check_terminal(home, source, tmp_path)
     _check_flush(source, tmp_path)
+    _check_cr_ends(home, source, tmp_path)
 
 
 def test_f15_t18_ctrl_c_leaves_no_file_and_gives_130(

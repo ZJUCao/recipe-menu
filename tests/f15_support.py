@@ -392,9 +392,12 @@ def traced_add(
 def pipe_module(tmp_path: Path, data: bytes, *argv: str) -> Result:
     """Runs ``python -m recipe_menu`` with bytes on its standard input, which it then closes.
 
-    The run is that of ``run_module`` of ``f05_support``: the current folder is ``tmp_path``,
-    ``HOME`` and ``USERPROFILE`` name ``tmp_path / "home"``, and ``PYTHONIOENCODING`` is
-    ``ascii``.
+    The current folder is ``tmp_path``, ``HOME`` and ``USERPROFILE`` name ``tmp_path / "home"``,
+    and ``PYTHONIOENCODING`` is ``ascii``.
+
+    Gives ``(code, stdout, stderr)``, with both streams decoded as UTF-8 and each ``os.linesep``
+    turned into LF. This undoes only the CR LF that Python's text streams write on Windows, so a
+    CR that the command writes stays in the text on both systems.
     """
     home = tmp_path / "home"
     home.mkdir(exist_ok=True)
@@ -412,8 +415,8 @@ def pipe_module(tmp_path: Path, data: bytes, *argv: str) -> Result:
         check=False,
         timeout=60,
     )
-    out = done.stdout.decode("utf-8").replace("\r\n", "\n")
-    err = done.stderr.decode("utf-8").replace("\r\n", "\n")
+    out = done.stdout.decode("utf-8").replace(os.linesep, "\n")
+    err = done.stderr.decode("utf-8").replace(os.linesep, "\n")
     return done.returncode, out, err
 
 
