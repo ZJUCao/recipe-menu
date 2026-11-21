@@ -100,7 +100,7 @@ def test_f15_t03_context_holds_the_input_and_main_passes_it_on(
     _check_context_values(example_folder)
     plain_help = call(home, ["--help"])
     data = b"\xef\xbb\xbf" + "salt 适量\r\n".encode()
-    wrapper = io.TextIOWrapper(io.BytesIO(data), encoding="cp1252")
+    wrapper = io.TextIOWrapper(io.BytesIO(data), encoding="cp1252", newline="\n")
     monkeypatch.setattr(sys, "stdin", wrapper)
     assert _echo(home, example_folder, None) == (0, "SALT 适量\n", "")
     assert (wrapper.encoding, wrapper.errors) == ("utf-8-sig", "replace")
@@ -121,16 +121,19 @@ def _read_all(stream: io.TextIOWrapper) -> list[str]:
 
 
 def _wrapped(data: bytes, encoding: str) -> io.TextIOWrapper:
-    """Makes a text stream over bytes, and calls ``use_utf8_input`` on it."""
-    stream = io.TextIOWrapper(io.BytesIO(data), encoding=encoding)
+    """Makes a text stream over bytes that ends a line only at LF, and calls ``use_utf8_input``.
+
+    The stream ends a line only at LF, as Python builds ``sys.stdin`` on Linux and macOS.
+    """
+    stream = io.TextIOWrapper(io.BytesIO(data), encoding=encoding, newline="\n")
     use_utf8_input(stream)
     return stream
 
 
 def test_f15_t04_use_utf8_input_makes_a_stream_read_utf8() -> None:
-    """The example of 3.3, and four inputs: other code pages, bad bytes, and other streams."""
+    """The example of 3.3, and five inputs: code pages, bad bytes, other streams, and line ends."""
     data = b"\xef\xbb\xbf" + "蒜蓉西兰花\r\n".encode() + b"\xffx\n"
-    stream = io.TextIOWrapper(io.BytesIO(data), encoding="cp1252")
+    stream = io.TextIOWrapper(io.BytesIO(data), encoding="cp1252", newline="\n")
     use_utf8_input(stream)
     assert (stream.encoding, stream.errors) == ("utf-8-sig", "replace")
     assert stream.readline() == "蒜蓉西兰花\n"
@@ -149,6 +152,9 @@ def test_f15_t04_use_utf8_input_makes_a_stream_read_utf8() -> None:
     crlf = io.StringIO("x\r\ny\n")
     use_utf8_input(crlf)
     assert [crlf.readline(), crlf.readline()] == ["x\r\n", "y\n"]
+    ends = b"\xef\xbb\xbfa\r\nb\rc\n\r\nd\r"
+    expected = ["a\n", "b\n", "c\n", "\n", "d\n"]
+    assert _read_all(_wrapped(ends, "cp1252")) == expected
 
 
 def _check_check_example(example: DataFolder) -> None:
