@@ -1,9 +1,9 @@
 ---
 troy-doc: "architecture"
 lang: "zh-CN"
-version: "5.1"
-updated: "2026-11-18"
-status: "Troy 已于 2026-11-17 批准"
+version: "6.0"
+updated: "2026-11-21"
+status: "Troy 已于 2026-11-21 批准"
 mirror-of: "architecture.md"
 ---
 
@@ -128,7 +128,7 @@ flowchart TD
 
 - 一个模块只依赖更低层的模块，以及本层里有箭头指向的模块。没有模块依赖更高层的模块，也没有模块依赖 `cli`。
 - 一个模块引用另一个模块时，只能写 `recipe_menu.<模块>` 或 `recipe_menu.commands.<模块>`，也就是那个模块的 `__init__.py`。在自己的文件夹里，模块直接引用自己的文件，从不引用自己的 `__init__.py`。
-- 基础层和领域层的模块从不打印、从不读取命令行或环境，也从不退出程序。只有 `cli` 接触外部世界（第 8 节）。
+- 基础层和领域层的模块从不打印、从不读取命令行或环境，也从不退出程序。只有 `cli` 接触外部世界（第 8 节）。唯一的例外是 `edit`：它在进程的 `PATH` 上找到设置里写的编辑器，启动它，并等它结束。其他模块都不启动程序（第 8 节，ADR-0013）。
 - `shopping` 不读任何文件。它把其他模块已经读出的值变成购物清单，所以 F12 的测试不需要文件。
 - `units` 不使用 `text`，因为 F01 排在 F02 前面。它用一个说明错在哪里的值来报告错误的数量，由 `catalog` 和 `recipes` 把这个值变成提示。
 - 有两条依赖来自公用模块，而不是来自需求的依赖图。F01 创建 `lang`，F02 使用它。F03 创建 `datafile`，F05 使用它。两条都指向更早的功能，符合设计检查清单的要求。
@@ -172,7 +172,7 @@ flowchart TD
 | `Recipe` | recipes | `id: str`、`name: BiText`、`servings: int`（1 或更多）、`tags: tuple[Tag, ...]`、`ingredients: tuple[RecipeIngredient, ...]`，以及每种语言一组字符串元组形式的步骤。 | ID 是去掉 `.toml` 的文件名。ID 按原样精确比较，所以 Windows 和 Linux 的结果相同。 |
 | `RecipeIngredient` | recipes | `ingredient: Ingredient`、`quantity: Quantity` 和 `note: BiText 或 None`。 | 没写单位的数量，读取时使用该食材的默认单位。 |
 | `Meal` | settings | 按顺序为 `BREAKFAST`、`LUNCH` 和 `DINNER`，带两种语言的名称。 | 一个 `StrEnum`，值就是文件里用的写法。 |
-| `Settings` | settings | `language: Lang 或 None`、`meals: tuple[Meal, ...]` 和 `servings: int`。 | 默认值：不指定语言，午餐和晚餐，2 份。v0.2 里 F14 加入 `dishes`，即每一餐几道菜，每餐 1 到 10 道，默认 1 道。 |
+| `Settings` | settings | `language: Lang 或 None`、`meals: tuple[Meal, ...]` 和 `servings: int`。 | 默认值：不指定语言，午餐和晚餐，2 份。v0.2 里 F14 加入 `dishes`，即每一餐几道菜，每餐 1 到 10 道，默认 1 道。F16 加入 `editor`，即 `edit` 启动的程序和它的选项，是由键 `editor` 读出的 `str` 元组，在每个系统上默认都是 `("notepad",)`。 |
 | `IsoWeek` | menus | `year: int` 和 `week: int`。 | 写作 `2026-W47`。能给出它的七个日期。`this` 和 `next` 由调用方传入的今天日期算出。 |
 | `Dish` | menus | `recipe_id: str` 和 `servings: int`。 | 文件没写份数时，读取函数填入设置里的份数，所以后面的模块不需要为一道菜去读设置。 |
 | `WeekMenu` | menus | `week: IsoWeek`，以及周一到周日每天每餐的菜。 | 只包含设置里列出的几餐。 |
@@ -197,6 +197,7 @@ flowchart TD
 | 语法错误，或者文件不是 UTF-8 | `tomllib.TOMLDecodeError`、`tomllib` 遇到位数太多的数字或嵌套太深时抛出的普通 `ValueError` 或 `RecursionError`，或者 `UnicodeDecodeError`。`datafile` 把每一种都变成带行号的 `Problem`（ADR-0002）。 | datafile | 1 | 文件、行号，以及用所选语言写的原因。 |
 | 文件读不了或写不了 | `OSError`，由 `datafile` 变成 `Problem`。 | datafile | 1 | 文件和出了什么问题：文件不存在、没有权限，或者其他系统错误。 |
 | 缺数据文件夹、菜单或菜谱 | cli 或命令检查的一个结果。 | 数据文件夹由 cli 检查，只要命令的 `FolderUse` 要求（F05 设计 2.5）。菜单或菜谱由命令自己检查（ADR-0008）。 | 1 | 一条提示，说明下一步运行什么，和原型一样。 |
+| 命令启动的程序找不到、启动不了，或者以 0 以外的退出码结束 | `shutil.which` 给出 `None`、`subprocess.Popen` 抛出 `OSError`，或者程序的退出码。这不是数据里的错误，所以不是 `Problem`。只有 F16 的 `edit` 启动程序，也就是编辑器（第 8 节，ADR-0013）。 | 命令自己。`edit` 只捕获 `Popen` 的 `OSError`，以及它每半秒一次的等待抛出的 `subprocess.TimeoutExpired`，后者只表示编辑器还在运行。 | 1 | stderr 上的一行，写出设置里写的程序，并说明出了什么问题；程序启动不了时带上系统给出的原因。不检查任何内容。命令等待程序时按 Ctrl+C，会交给 `cli`，退出码为 130，程序继续运行。 |
 | 命令行或参数值写错 | `UsageError`，由解析器或命令抛出。 | cli | 2 | 提示，然后是错误指定的那一行，比如指向 `recipe-menu --help` 的一行，和 F05 原型一样。提示本身已经说明怎么写的错误（比如 F11 里写错的周）可以不指定这一行（ADR-0008）。 |
 | Ctrl+C | `KeyboardInterrupt`。 | cli | 130 | 不再输出任何内容。写文件是原子操作，所以不会留下写了一半的文件。 |
 | bug | 任何其他异常。 | 没有 | 1，Python 的默认值 | stderr 上的 Python 回溯信息。出现回溯信息就一定是 bug。 |
@@ -205,7 +206,7 @@ flowchart TD
 - 警告（比如缺一种语言）从不改变退出码。
 - `except` 子句写明它捕获的异常，而且只写在把异常变成 `Problem`、结果或 `UsageError` 的地方。没有代码捕获 `Exception`，也没有代码使用不带异常名的 `except`。
 - 解析器的英文原文从不单独出现在用户面前。`datafile` 把它认识的原因变成提示，其他原因则显示一条通用提示和行号。
-- 问题里的文件路径相对于数据文件夹，使用系统的分隔符，比如 Windows 上的 `recipes\mapo-tofu.toml`。其他提示用完整路径写出文件或文件夹。`init` 的失败是第一条规则的例外，因为它的数据文件夹是你刚刚要它创建的，而不是你每天在用的那个（ADR-0009）。失败的第一行用完整路径 `str(context.folder.root / problem.file)` 写出 `init` 没能创建的文件夹或文件。在数据文件夹本身或它上面的文件夹处失败时，问题的文件是 `Path(".")`，所以这一行写出数据文件夹。`Problem` 仍然保存相对于数据文件夹的文件（5.2）。F11 的 `menu new` 失败时，第一行用完整路径写出它没能写入的文件，或者它没能列出的文件夹 `menus\`（ADR-0010）。F13 的 `shop` 也可以用完整路径写出它没能写入的文件。F14 的 `menu suggest` 里告诉你怎样换掉一道菜的那一行是第二条规则的例外：它像问题那样，用相对于数据文件夹的路径写出这一周的菜单文件，比如 `menus\2026-W48.toml`（ADR-0011）。
+- 问题里的文件路径相对于数据文件夹，使用系统的分隔符，比如 Windows 上的 `recipes\mapo-tofu.toml`。其他提示用完整路径写出文件或文件夹。`init` 的失败是第一条规则的例外，因为它的数据文件夹是你刚刚要它创建的，而不是你每天在用的那个（ADR-0009）。失败的第一行用完整路径 `str(context.folder.root / problem.file)` 写出 `init` 没能创建的文件夹或文件。在数据文件夹本身或它上面的文件夹处失败时，问题的文件是 `Path(".")`，所以这一行写出数据文件夹。`Problem` 仍然保存相对于数据文件夹的文件（5.2）。F11 的 `menu new` 失败时，第一行用完整路径写出它没能写入的文件，或者它没能列出的文件夹 `menus\`（ADR-0010）。F13 的 `shop` 也可以用完整路径写出它没能写入的文件。F14 的 `menu suggest` 里告诉你怎样换掉一道菜的那一行是第二条规则的例外：它像问题那样，用相对于数据文件夹的路径写出这一周的菜单文件，比如 `menus\2026-W48.toml`（ADR-0011）。F16 的 `edit` 告诉你用哪个编辑器打开了菜谱的第一行，也是第二条规则的例外：它像问题那样，用相对于数据文件夹的路径写出菜谱文件，比如 `recipes\mapo-tofu.toml`（ADR-0012）。编辑器拿到的是文件的完整路径。
 - 命令的输出写到 stdout。以退出码 1 或 2 结束命令的提示写到 stderr。`check` 的报告就是它的输出，所以无论退出码是什么都写到 stdout。
 - `datafile` 以独占模式创建新文件，所以 `init` 和 `menu new` 会拒绝，而不会覆盖。要替换的文件（比如一周的购物清单）先写到同一文件夹里的临时文件，再移过去替换旧文件。
 
@@ -227,7 +228,8 @@ flowchart TD
 - **数量。** 每个数量都是 `Fraction`。不用 `float` 存放数量（ADR-0007）。
 - **值。** 跨越模块的值是带 `slots=True` 的冻结 dataclass，或者枚举。其中的集合用元组或 frozenset。
 - **文件。** 路径是 `pathlib.Path` 值。每次打开文件都写明编码：读用 `utf-8-sig`，写用 `utf-8` 加 `newline="\n"`。只有 `datafile` 打开数据文件。
-- **外部世界（Lint）。** 只有 `cli` 读取 `sys.argv`、环境变量、主文件夹、今天的日期、控制台输出流和随机种子。它通过 `Context` 和函数参数把这些传下去，所以测试可以给出固定的值。
+- **外部世界（Lint）。** 只有 `cli` 读取 `sys.argv`、环境变量、主文件夹、今天的日期、控制台输出流和随机种子。它通过 `Context` 和函数参数把这些传下去，所以测试可以给出固定的值。下面的“程序”一条给出唯一的例外。
+- **程序（Lint）。** 只有 `edit` 启动程序，而且只启动设置里写的编辑器（ADR-0013）。它用 `shutil.which` 找到程序，用不经 shell 的 `subprocess.Popen` 启动它，并每半秒一次地等它结束，这样在 Windows 上按 Ctrl+C 也能打断等待。`shutil.which` 从进程的环境里读取 `PATH`，在 Windows 上还读取 `PATHEXT` 和 `NoDefaultCurrentDirectoryInExePath`，而不是从 `Context` 里读取。在 Windows 上，除非设置了最后这个变量，它会先在当前文件夹里找。编辑器拿到进程的环境、当前文件夹和控制台。所以 `main(environ={})` 不能让 `edit` 避开进程的 `PATH` 和当前文件夹，`edit` 的测试要自己设置它们（第 10 节）。`edit` 只在启动编辑器的函数里引用 `subprocess` 和 `shutil`，所以其他命令不会加载它们。其他模块都不启动程序，也不调用 `shutil.which`、`subprocess`、`os.system`、`os.startfile`、`os.popen`，或者 `os.exec` 和 `os.spawn` 系列函数。编辑器是你自己选的程序，不属于这个工具，所以第 1 节的“不用网络”保持不变。
 - **输出。** 没有代码调用 `print()`，也没有代码直接写 `sys.stdout` 或 `sys.stderr`。输出写到 `Context` 里的流。ruff 的 `T20` 规则已经检查 `print()`。
 - **不用网络（Lint）。** 没有模块引用网络模块，比如 `socket`、`http`、`urllib.request`、`ftplib` 或 `smtplib`。
 - **只读需要的内容。** 命令只读它需要的文件。`show`、`menu show` 和 `shop` 解析设置、目录、需要时的常备清单、菜单，以及它们点名的菜谱。`list`、`search` 和 `check` 解析所有菜谱。`recipes` 从 `recipes/` 里的文件名列出菜谱 ID，不解析文件。
@@ -254,13 +256,14 @@ flowchart TD
 - 改动代码的覆盖率如何统计（R11）：coverage.py 用 `coverage run -m pytest` 统计 `src` 里的行和分支，再用 `coverage xml` 写出 `reports/coverage.xml`。troy-check 把这份报告和 PR 改动的行做比较。
 - 示例数据：`tests/data/example/` 存放 `docs/prototypes/example-data.md` 里完整的示例数据文件夹，包括全部七个菜谱和 `2026-W47` 的菜单。一个 fixture 把它复制到 `tmp_path`，所以没有测试会改动仓库或碰到 `~/recipe-menu`。
 - 在测试进程里运行：测试用命令的参数、数据文件夹、一个固定的日期和字符串流调用 `recipe_menu.cli.main`，然后检查退出码和文字。原型里的日期是 2026 年 11 月 10 日，星期二。
+- 命令启动的程序：`tests/` 和 `version-tests/` 里的测试都不启动真正的编辑器，也都不需要控制台。运行 `edit` 的测试自己设置 `edit` 搜索的 `PATH`，因为 `main(environ={})` 不能让 `edit` 避开进程的 `PATH` 和当前文件夹（第 8 节）。它只让 `edit` 找到一个替身编辑器，即一个不开窗口的脚本，由设置写出，或者由测试放到这个 `PATH` 上。在 `tests/` 里，运行 `edit` 的测试都在一个守卫下运行：它通过 `monkeypatch` 把 `PATH` 和当前文件夹都设成空文件夹，所以忘了写键 `editor` 的测试，在有记事本的 Windows 上也找不到编辑器。F16 测试计划给出替身和守卫。只有 Troy 在自己电脑上手动运行的场景才启动真正的编辑器，比如记事本。
 - 两个系统：每个测试在 Linux 和 Windows 上都能通过，预期的路径由 `pathlib` 构造。只能在一个系统上运行的用例，要在测试计划里写明原因。
 - 控制台：CI 机器都没有 Windows 控制台。所以版本测试计划请 Troy 在 Windows Terminal 里，用 Windows PowerShell 5.1 和 PowerShell 7 检查中文输出。
 - 性能（PT01）：一个辅助函数在 `tmp_path` 里生成有 1,000 个菜谱、300 种食材和 52 个周菜单的数据文件夹。测试用 `python -m recipe_menu` 把每个命令从启动到退出运行 5 次，取中位数。它在 Troy 的电脑上运行（R14）。放在 `tests/` 里的性能用例也会在 CI 的 Linux 上运行，而那台机器不是固定的。所以测试经理要给这样的用例留出在那里也成立的余量，或者把它放进 `version-tests/`。
 
 ## 11. 决策记录
 
-Troy 于 2026-11-10 批准本文档，接受了 ADR-0001 到 ADR-0007；于 2026-11-12 在 F05 设计里接受了 ADR-0008；于 2026-11-13 在 F08 设计里接受了 ADR-0009；于 2026-11-14 在 F11 设计里接受了 ADR-0010；又于 2026-11-17 在 F14 设计里接受了 ADR-0011。
+Troy 于 2026-11-10 批准本文档，接受了 ADR-0001 到 ADR-0007；于 2026-11-12 在 F05 设计里接受了 ADR-0008；于 2026-11-13 在 F08 设计里接受了 ADR-0009；于 2026-11-14 在 F11 设计里接受了 ADR-0010；于 2026-11-17 在 F14 设计里接受了 ADR-0011；又于 2026-11-21 在 F16 设计里接受了 ADR-0012 和 ADR-0013。
 
 | ADR | 标题 | 状态 |
 | --- | --- | --- |
@@ -275,6 +278,8 @@ Troy 于 2026-11-10 批准本文档，接受了 ADR-0001 到 ADR-0007；于 2026
 | ADR-0009 | init 失败时用完整路径写出问题的文件 | 已接受 |
 | ADR-0010 | menu new 失败时用完整路径写出它的文件或文件夹 | 已接受 |
 | ADR-0011 | menu suggest 的换菜提示用相对于数据文件夹的路径写出它的文件 | 已接受 |
+| ADR-0012 | edit 的第一行用相对于数据文件夹的路径写出菜谱文件 | 已接受 |
+| ADR-0013 | edit 启动设置里写的编辑器 | 已接受 |
 
 ## 12. 修改记录
 
@@ -291,3 +296,5 @@ Troy 于 2026-11-10 批准本文档，接受了 ADR-0001 到 ADR-0007；于 2026
 | 4.1 | 2026-11-17 | 记下 Troy 于 2026-11-17 在 F14 设计里为 D 点选定的做法 1（ADR-0011）。第 6 节：`menu suggest` 里告诉你怎样换掉一道菜的那一行，像问题那样用相对于数据文件夹的路径写出这一周的菜单文件。`menu suggest` 保存失败时，按问题保存的样子写出文件；写到它没能删除的临时文件的那一行，用完整路径写出那个文件；这两点第 6 节本来就是这样规定的。第 6 节的其他情况都保持 Troy 批准时的样子。第 5.2 节：`Settings` 一行写上每一餐几道菜，由 F14 在 v0.2 加入。第 11 节列出 ADR-0011。第 5.2 节还按架构师在 F12 设计评审里的计划，改写了 `Ingredient` 一行的说明：购物清单合并相等的食材，对读取函数给出的值来说，相等的食材就是同一个对象，没有改变任何规则。 |
 | 5.0 | 2026-11-17 | Troy 批准。 |
 | 5.1 | 2026-11-18 | 第 6 节：讲到 `menu suggest` 里告诉你怎样换掉一道菜的那一行时，所举的例子重新写成 `menus\2026-W48.toml`，和 ADR-0011 以及 F14 设计一样；4.1 版在这里用一个控制字符代替了 `\202`。没有改变任何规则。Troy 让产品经理合并这项修正，不经 Troy 审阅。 |
+| 5.2 | 2026-11-21 | 记下 Troy 于 2026-11-21 在 F16 设计里为 B 点和 C 点选定的做法 1（ADR-0012 和 ADR-0013）。第 6 节：`edit` 的第一行像问题那样，用相对于数据文件夹的路径写出菜谱文件，编辑器拿到完整路径（B）。新加的一行讲命令启动的程序：编辑器找不到、启动不了，或者以 0 以外的退出码结束时，在 stderr 上写一行，退出码为 1；`edit` 等待时按 Ctrl+C，退出码为 130，编辑器继续运行（C）。第 6 节的其他情况都保持 Troy 批准时的样子。第 4 节和第 8 节：只有 `edit` 启动程序，也就是设置里写的编辑器。它用 `shutil.which` 找到编辑器，`shutil.which` 从进程的环境里读取 `PATH`、`PATHEXT` 和 `NoDefaultCurrentDirectoryInExePath`，编辑器拿到这个环境、当前文件夹和控制台。其他模块都不启动程序（C）。“外部世界”一条指向这个例外，其他规则都保持 Troy 批准时的样子。第 5.2 节：`Settings` 一行写上 `editor`，由 F16 在 v0.2 加入。第 10 节：测试都不启动真正的编辑器，运行 `edit` 的测试设置 `edit` 搜索的 `PATH`，只让它找到替身编辑器。第 11 节列出 ADR-0012 和 ADR-0013。 |
+| 6.0 | 2026-11-21 | Troy 批准。 |
