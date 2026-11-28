@@ -1,8 +1,8 @@
 ---
 troy-doc: "rules"
 lang: "zh-CN"
-version: "2.1"
-updated: "2026-11-19"
+version: "2.2"
+updated: "2026-11-28"
 status: "Troy 已于 2026-11-16 批准"
 mirror-of: "rules.md"
 ---
@@ -42,6 +42,7 @@ mirror-of: "rules.md"
 | R20 | 合并的文档和 PR 描述里没有模板标记或填写说明。 | 硬 | CI | troy-mode | 2026-11-09 |
 | R21 | 每个改动都通过从单独分支发起的 PR 进入 `main`。永远不要在 `main` 上提交、推送 `main`，或从 `main` 开 PR。 | 硬 | Hook 和 CI | troy-mode | 2026-11-09 |
 | R22 | 每个接口设计、测试计划、需求和架构 PR 的描述都以给 Troy 的摘要开头，先中文后英文：对 Troy 有什么变化、需要 Troy 决定的每一件事及推荐，以及风险。每种语言最多 2,000 个字符（`.troy-mode/config.toml` 里的 `[summary] max_chars`），不含内部编号。 | 硬 | CI | troy-mode | 2026-11-15 |
+| R23 | 在 troy-mode 运行的命令里，Python 永远不从标准输入读取程序：不用 `python -`，不用 `python -i`，也不在没有脚本、`-c` 或 `-m` 的情况下运行 `python`，无论标准输入来自 heredoc、管道、`/dev/null`，还是什么都没有。这样的运行可能卡在 Python 的交互提示符上。把脚本写到 scratchpad 里的一个文件中，再用项目的 Python 运行这个文件。 | 硬 | Hook（命令启动前就拒绝） | troy-mode | 2026-11-28 |
 | P01 | 测试辅助模块（`tests/` 或 `version-tests/` 下本身不含测试的辅助模块）的文档注释说明模块的用途和它遵守的限制，比如导入时不调用任何接口。它不写出模块自己定义或导入的函数、类和常量的名字，也不写出测试从别的模块取用的名字：这些函数、类和常量各自在自己的文档注释里说明用途。限制里可以写出模块不碰的接口或值。改动测试辅助模块的 PR 同时让它的文档注释符合本规则。 | 审查 | 测试经理和代码审查员 | project | 2026-11-16 |
 
 ## 3. 修改记录
@@ -52,3 +53,4 @@ mirror-of: "rules.md"
 | 1.1 | 2026-11-15 | troy-mode 的规则更新到 troy-pstack 0.5.0。 |
 | 2.0 | 2026-11-16 | 新增 P01，Troy 在 v0.1.0 回顾中选定，并于 2026-11-16 批准。已有代码：用清理 PR 修复。 |
 | 2.1 | 2026-11-19 | troy-mode 的规则更新到 tstack 0.7.4。 |
+| 2.2 | 2026-11-28 | troy-mode 的规则更新到 tstack 0.20.1。 |
